@@ -4,3 +4,4 @@
 //sættes på stakken – og når der mødes en højre parentes, skal det kontrolleres, om den tilsvarende venstre
 //parentes er øverst på stakken. Brug metoderne push() og pop().
 //→ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
+
