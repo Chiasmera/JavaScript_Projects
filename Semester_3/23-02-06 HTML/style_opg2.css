@@ -1,0 +1,18 @@
+table, td {
+    border-color: blue;
+    border-collapse: collapse;
+    border-width: 2px;
+    border-style: solid;
+
+}
+
+h1 {
+    text-decoration: underline;
+    font-weight: bold;
+    color: blue;
+}
+
+img {
+    width: 10em;
+    height: 10em;
+}

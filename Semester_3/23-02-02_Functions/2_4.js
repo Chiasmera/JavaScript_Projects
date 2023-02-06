@@ -7,7 +7,11 @@
 let saetning = 'Julemanden deler gaver ud til dem som ikke har tævet andre for deres religion, hudfarve eller seksuelle orientering';
 
 function splitStringToObject (string) {
-    let object = {...string.split(' ')};
+    let stringArray = string.split(' ');
+    let map = {};
+    for (let ord of stringArray) {
+        ord in map ? map[ord]++ : map[ord] = 1;
+    }
     return object;
 }
 
