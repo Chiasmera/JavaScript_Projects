@@ -1,0 +1,33 @@
+#artikel {
+  display: grid;
+  grid-template-columns: 1fr, 2fr;
+  grid-template-areas:  "image title"
+                        "image subtitle"
+                        "imagetext maintext"
+                        "maintext maintext";
+}
+
+#image {
+  grid-area: image;
+
+}
+
+#imagetext {
+  grid-area: imagetext;
+
+}
+
+#title {
+  grid-area: title;
+
+}
+
+#subtitle {
+  grid-area: subtitle;
+
+}
+
+#maintext {
+  grid-area: maintext;
+
+}

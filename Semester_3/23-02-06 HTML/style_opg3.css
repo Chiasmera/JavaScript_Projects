@@ -1,7 +1,6 @@
-#container {
+.container {
     display: grid;
-    grid-template-columns: 33%, 66%;
-    grid-template-rows: 20%, 1fr, 1fr, 10%;
+    grid-template-columns: 1fr, 2fr;
     grid-template-areas: 
                 "header header"
                 "image1 text1 "
@@ -49,16 +48,8 @@ h1 {
 
 }
 
-@media screen and (max-width : 1000) {
-    #container {
-        grid-template-columns: 100%;
-        grid-template-rows: 20%, 1fr, 1fr, 10%;
-        grid-template-areas: 
-                    "header"
-                    "image1"
-                    "text1"
-                    "image2"
-                    "text2"
-                    "footerlink";
+@media only screen and (max-width : 600) {
+    .container {
+        grid-template-columns: 1fr;
     }
 }
