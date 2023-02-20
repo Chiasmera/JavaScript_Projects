@@ -1,33 +1,112 @@
+body {
+    margin: 0px;
+    padding: 0px;
+  }
+
+#header {
+    display: grid;
+    grid-template-columns: 15%;
+    grid-template-rows: 1fr;
+    grid-template-areas: "companyIcon companyName";
+  
+    gap: 0px;
+    background-color:darkolivegreen;
+  }
+  
+  #companyName {
+    grid-area: companyName;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 3.5em;
+    width: 100%;
+    margin: auto;
+    padding: auto;
+    vertical-align: middle;
+     
+  }
+  
+  #companyIcon {
+    grid-area: companyIcon;
+    max-width: 7em;
+    max-height: 7em;
+    margin: 0px;
+    padding: 0em;    
+  }
+
+  iframe[seamless] {
+    border: none;
+  }
+
+
+
+
+  
+
+
+
 #artikel {
   display: grid;
-  grid-template-columns: 1fr, 2fr;
-  grid-template-areas:  "image title"
-                        "image subtitle"
-                        "imagetext maintext"
-                        "maintext maintext";
+  grid-template-columns: 1fr, 1fr;
+  grid-template-rows: 1fr;
+  grid-template-areas:  "imageGrid textGrid";
+  
+  gap: 1em;
+  padding: 1em;
+}
+
+#imageGrid {
+  grid-area: imageGrid;
+}
+
+#textGrid {
+  grid-area: textGrid;
 }
 
 #image {
   grid-area: image;
+  max-width: 20em;
+  max-height: 20em;
+  min-width: 10em;
+  min-height: 10em;
+  border-style: dashed;
 
 }
 
 #imagetext {
   grid-area: imagetext;
+  vertical-align: top;
+  font-style: italic;
+  font-size: 0.9em;
+  border-style: dashed;
+  height: auto;
+
 
 }
 
 #title {
   grid-area: title;
+  text-align: center;
+  padding: 0%;
+  margin: 0%;
+  font-size: 4em;
 
 }
 
 #subtitle {
   grid-area: subtitle;
-
+  font-style: italic;
+  padding: 0%;
+  margin: 1em,0%,1em,0%;
+  font-size: 1.2em;
 }
 
 #maintext {
   grid-area: maintext;
+  text-align: justify;
+  padding: 0%;
+  margin: 0%;
+  column-count: 3;
 
 }
+
+
+
