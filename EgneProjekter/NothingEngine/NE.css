@@ -1,0 +1,53 @@
+body {
+    padding: 0%;
+    margin: 0%;
+    background-color: black;
+}
+
+header>p {
+    margin: 0%;
+    margin-bottom: 15%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+
+    background-color: cadetblue;
+    text-align: center;
+    font-size: x-large;
+    font-weight: bold;
+}
+
+#game {
+    display: grid;
+    grid-template-columns: 1fr 10fr 1fr;
+    grid-template-rows: 1fr 10fr 1fr;
+    grid-template-areas:    ". . input"
+                            ". gridBody gridBody"
+                            "output gridBody gridBody";
+}
+
+#input {
+    grid-area: input;
+    background-color: green;
+    height: 10px;
+    width: 10px;
+}
+
+#output{
+    grid-area: output;
+    background-color: red;
+    height: 10px;
+    width: 10px;
+}
+
+#grid {
+    grid-area: gridBody;
+    border-style: double;
+    border-color: grey;
+    height: 25em;
+    width: 25em;
+    gap: 0px;
+    background-color: rgb(179, 179, 179);
+    
+
+}
+
