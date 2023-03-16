@@ -16,8 +16,6 @@ async function start(userUrl) {
         
         let userArray = await get(userUrl);
 
-        
-        
         createTable(userArray, document.body,'id', 'name', 'email', );
 
         let rows = document.querySelectorAll('tr');
@@ -25,8 +23,6 @@ async function start(userUrl) {
             (element) => element.addEventListener('click', (event) => onClickTable(event))
         )
         
-
-
     } catch (error) {
         console.log(error)
         
