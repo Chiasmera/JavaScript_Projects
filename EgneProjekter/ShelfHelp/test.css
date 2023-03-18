@@ -1,0 +1,14 @@
+img {
+    max-width: 75px;
+    max-height: 75px;
+}
+
+table {
+     border-collapse:collapse;
+}
+
+td {
+    border-style: solid;
+   
+    
+}
