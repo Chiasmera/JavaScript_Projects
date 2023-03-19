@@ -5,10 +5,44 @@ img {
 
 table {
      border-collapse:collapse;
+     min-width: 50%;
+     max-width: 75%;
+}
+
+tr {
+    border-style:double;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    border-width: 3px;
+    border-color: grey;
+
+}
+
+th {
+    text-align: center;
+    font-weight: bold;
+    font-size: large;
+    
+    padding: 10px;
+
+    border-style: solid;
+    border-top: none;
+    border-width: 1px;
 }
 
 td {
-    border-style: solid;
+    padding: 5px;
+
+    
    
     
+}
+
+
+
+.index {
+    text-align: center;
+    min-width: 3em;
+    font-weight: bold;
 }

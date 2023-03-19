@@ -6,22 +6,55 @@
 let username = 'LuciusWriter'
 const LWCollection = `https://boardgamegeek.com/xmlapi2/collection?username=${username}&excludesubtype=boardgameexpansion`
 let itemArray;
+let collection = {};
+let lastTimeFetched;
 
 async function getCollection (url) {
-    let response = await fetch(url)
-    if (response.status === 202) {
-        //Prøv igen
-        setTimeout(getCollection(url),10000)
-        console.log('Server busy, retrying in 10 seconds')
+         let response = await fetch(url)
+        if (response.status === 202) {
+            //Prøv igen
+            setTimeout(getCollection(url),10000)
+            console.log('Server busy, retrying in 10 seconds')
 
-    } else if (response.status !== 200) {
-        throw new Error("fetch failed. Status: "+response.status)
-    }
-    return await response.text()
+        } else if (response.status !== 200) {
+            throw new Error("Collection fetch failed. Status: "+response.status)
+        }
+        return await response.text()
 }
 
 async function assignCollection(url) {
     return result = parseXml(await getCollection(url))
+}
+
+async function fetchCollection (url) {
+    let rawResponse = parseXml(await getCollection(url)).items
+    
+    collection.size = rawResponse.totalitems
+    collection.owner = username
+    collection.games = []
+    for (let item of rawResponse.item) {
+
+        let fetchedRawItem = await parseXml(await retrieveGameByID(item.objectid)).items.item
+
+        currentGame = {
+            id : item.objectid,
+            name : typeof fetchedRawItem.name[0] !== 'undefined'? fetchedRawItem.name[0].value : fetchedRawItem.name.value,
+            image : fetchedRawItem.image['#text'],
+            thumbnail : item.thumbnail['#text'],
+            minPlayers : parseInt(fetchedRawItem.minplayers.value),
+            maxPlayers : parseInt(fetchedRawItem.maxplayers.value),
+            recommendedPlayers : parseInt(findSuggestedPlayerNumber(fetchedRawItem)),
+            minTime : parseInt(fetchedRawItem.minplaytime.value),
+            maxTime : parseInt(fetchedRawItem.maxplaytime.value),
+            playingTime : parseInt(fetchedRawItem.playingtime.value),
+            languageDependence : findLanguageDependence(fetchedRawItem),
+            description : fetchedRawItem.description['#text']
+
+            
+
+        }
+        collection.games.push(currentGame)
+    }    
 }
 
 /**
@@ -69,16 +102,16 @@ function parseXml(xml, arrayTags) {
     return result;
 }
 
-function createHeader (collection) {
+function createHeader () {
     let header = document.createElement('header')
     document.body.appendChild(header)
 
     let owner = document.createElement('h2')
-    owner.textContent = `Owner: ${username}`
+    owner.textContent = `Owner: ${collection.owner}`
     header.appendChild(owner)
 
     let totalItems = document.createElement('h3')
-    totalItems.textContent = `Total games (no expansions):   ${itemArray.length}`
+    totalItems.textContent = `Total games (no expansions):   ${collection.size}`
     header.appendChild(totalItems)
 }
 
@@ -105,17 +138,19 @@ function createTableOfGames () {
     playerNumberHeader.textContent = 'Number of Players (best with)'
     headerRow.appendChild(playerNumberHeader)
 
+    let playtimeHeader = document.createElement('th')
+    playtimeHeader.textContent = 'Playtime'
+    headerRow.appendChild(playtimeHeader)
+
+
     createRows(table);
 }
 
 async function createRows (table) {
     let index = 1;
-        for ( let game of itemArray) {
+        for ( let game of collection.games) {
             //Fetches data for game by id, and parses from XML to object
-            const gameData = parseXml(await retrieveGameByID(game.objectid)).items.item
-            if (index < 3){console.log(gameData);}
             
-
             //Creates row
             let gameRow = document.createElement('tr')
             table.appendChild(gameRow)
@@ -123,46 +158,70 @@ async function createRows (table) {
             //sets index of row
             let indexCell = document.createElement('td')
             indexCell.textContent = index++;
+            indexCell.className = 'index'
             gameRow.appendChild(indexCell)
 
             //Sets name cell
             let nameCell = document.createElement('td')
-            if (typeof gameData.name[0] !== 'undefined') {
-                nameCell.textContent = gameData.name[0].value
-            } else {
-                nameCell.textContent = gameData.name.value
-            }
+            nameCell.textContent = game.name
             gameRow.appendChild(nameCell)
 
             //Sets image
             let imageCell = document.createElement('td')
             let image = document.createElement('img')
-            image.src = `${gameData.image['#text']}`
+            image.src = game.image
             imageCell.appendChild(image)
             gameRow.appendChild(imageCell)
 
             //Sets playernumber
             let numPlayerCell = document.createElement('td')
-            numPlayerCell.textContent = `${gameData.minplayers.value} - ${gameData.maxplayers.value} (${findSuggestedPlayerNumber(gameData)})`
+            numPlayerCell.textContent = `${game.minPlayers} - ${game.maxPlayers} (${game.recommendedPlayers})`
             numPlayerCell.style.textAlign = 'center'
             gameRow.appendChild(numPlayerCell)
+
+            //Sets playtime
+            let playtimeCell = document.createElement('td')
+            if (game.minTime === game.maxTime) {
+                playtimeCell.textContent = `${game.maxTime}`
+            } else {
+                playtimeCell.textContent = `${game.minTime} - ${game.maxTime}`
+            }
+            
+            playtimeCell.style.textAlign = 'center'
+            gameRow.appendChild(playtimeCell)
+
     }
 }
 
 
 async function retrieveGameByID (id) {
-    let response = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${id}`)
-    if (response.status === 202) {
-        //Prøv igen
-        setTimeout(getCollection(url),10000)
-        console.log('Server busy, retrying in 10 seconds')
+ 
+        let response = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${id}`)
+        let retryCounter = 0;
+        if (response.status === 202) {
+            //Prøv igen
+            setTimeout(getCollection(url),10000)
+            console.log('Server busy, retrying in 10 seconds')
 
-    } else if (response.status !== 200) {
-        throw new Error("fetch failed. Status: "+response.status)
-    }
-    return await response.text()
+        } else if (response.status !== 200) {
+            if (retryCounter < 3) {
+                setTimeout(retrieveGameByID(id), 2000)
+                retryCounter++;
+            } else {
+                throw new Error("fetch failed. Status: "+response.status)
+            }
+            
+        }
+        return await response.text()
+
+    
 }
 
+/**
+ * Returns the amount of players with the most votes in the "best" category, in the given XML parsed BGG representation of a game
+ * @param {*} gameObject 
+ * @returns 
+ */
 function findSuggestedPlayerNumber(gameObject) {
     let poll = gameObject.poll[0].results.reduce( (acc, current) => {
         if (parseInt(current.result[0].numvotes) >= parseInt(acc.result[0].numvotes)) {
@@ -175,17 +234,45 @@ function findSuggestedPlayerNumber(gameObject) {
     return poll.numplayers
 }
 
-async function main () {
-    temp = await assignCollection(LWCollection)
-    itemArray = temp.items.item
+/**
+ * Returns an object with the description and number of votes of the most voted-upon option for language dependency, in the given XML parsed BGG representation of a game
+ * @param {*} gameObject 
+ * @returns object with a string description and an int number of votes
+ */
+function findLanguageDependence(gameObject) {
+    let poll = gameObject.poll[2].results.result.reduce( (acc, current) => {
+        if (parseInt(current.numvotes) >= parseInt(acc.numvotes)) {
+            return current  
+        } else {
+            return acc
+        }     
+    } )
 
-    createHeader(itemArray)
-    createTableOfGames()
-    //console.log(itemArray);
+    let object = {
+        description : poll.value,
+        votes : poll.numvotes
+    }
+    
+
+    return object
 
 }
 
-main()
+async function main (url) {
+    try {
+        await fetchCollection(url)
+            
+        } catch (error) {
+        console.log('Caught error: '+error)  
+    }
+ 
+    createHeader();
+    createTableOfGames()
+}
+
+
+main(LWCollection)
+
 
 
 
