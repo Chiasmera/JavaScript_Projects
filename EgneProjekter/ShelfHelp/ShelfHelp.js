@@ -4,11 +4,16 @@
 //ting retrieval API link: /xmlapi2/thing?parameters
 
 let username = 'LuciusWriter'
-const LWCollection = `https://boardgamegeek.com/xmlapi2/collection?username=${username}&excludesubtype=boardgameexpansion`
+const collectionURL = `https://boardgamegeek.com/xmlapi2/collection?username=${username}&excludesubtype=boardgameexpansion`
 let itemArray;
 let collection = {};
 let lastTimeFetched;
 
+/**
+ * Fetches the XML repressenting a users collection returned from BGG's API2
+ * @param {*} url 
+ * @returns 
+ */
 async function getCollection (url) {
          let response = await fetch(url)
         if (response.status === 202) {
@@ -22,10 +27,12 @@ async function getCollection (url) {
         return await response.text()
 }
 
-async function assignCollection(url) {
-    return result = parseXml(await getCollection(url))
-}
 
+
+/**
+ * Fetches the collection of a specific user from BGG, and parses the returned XML as an js object.
+ * @param {*} url API call to a users collection
+ */
 async function fetchCollection (url) {
     let rawResponse = parseXml(await getCollection(url)).items
     
@@ -58,7 +65,11 @@ async function fetchCollection (url) {
 }
 
 /**
- * Shamelessly stolen xml parser. Authors note: The following function parses XML and returns a JavaScript object with a scheme that corresponds to the XML. XML siblings w/ the same name are collapsed into arrays. nodes with names that can be found in the arrayTags parameter (array of tag name strings) always yield arrays even in case of only one tag occurrence. arrayTags can be omitted. Text nodes with only spaces are discarded.
+ * Shamelessly stolen xml parser, that needs to be rewritten when you learn more XML. 
+ * Authors note: The following function parses XML and returns a JavaScript object with a scheme that 
+ * corresponds to the XML. XML siblings w/ the same name are collapsed into arrays. nodes with names 
+ * that can be found in the arrayTags parameter (array of tag name strings) always yield arrays even in 
+ * case of only one tag occurrence. arrayTags can be omitted. Text nodes with only spaces are discarded.
  * @param {*} xml xml string to convert to an object
  * @param {*} arrayTags Not necessary. Not sure what it does
  * @returns Object formatted like the xml
@@ -193,7 +204,11 @@ async function createRows (table) {
     }
 }
 
-
+/**
+ * Retrieves a game from BGG by its objectid
+ * @param {objectid} id the objectid of a boardgame on BGG 
+ * @returns XML string representation of the board game object
+ */
 async function retrieveGameByID (id) {
  
         let response = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${id}`)
@@ -258,9 +273,15 @@ function findLanguageDependence(gameObject) {
 
 }
 
+
+/**
+ * Executes when the script is run
+ * @param {*} url URl wor a user collection of board games
+ */
 async function main (url) {
     try {
         await fetchCollection(url)
+        console.log(collection.games)
             
         } catch (error) {
         console.log('Caught error: '+error)  
