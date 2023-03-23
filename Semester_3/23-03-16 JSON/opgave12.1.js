@@ -49,9 +49,9 @@ async function createCells (table) {
         .map(element => {
                 return ({mag: element.properties.mag, 
                         place: element.properties.place,
-                        time: (element.properties.time / 1000) + " Seconds" })
+                        time: new Date(element.properties.time).toLocaleString()})
         })
-        .sort( (a, b) => a.mag <= b.mag ? 1 : a.mag > b.mag ? -1 : 0 )
+        .sort( (a, b) => a.mag - b.mag)
         .forEach(element => {
             let row = document.createElement('tr')
             table.appendChild(row);

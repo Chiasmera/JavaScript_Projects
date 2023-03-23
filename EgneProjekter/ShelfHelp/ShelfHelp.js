@@ -271,7 +271,7 @@ async function main (url) {
 }
 
 
-main(LWCollection)
+main(collectionURL)
 
 
 
