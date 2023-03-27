@@ -1,0 +1,9 @@
+include includes/head
+body
+    h1 Yoho, yoho, to me hearty #{name}
+    ul 
+        each cat in cats 
+            li
+                p= cat.name
+                img(src='images/' + cat.imageName)
+    include includes/foot

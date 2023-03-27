@@ -1,0 +1,18 @@
+html 
+    head
+        meta(char-set='UTF-8')
+        title= title
+        link(rel="stylesheet", href="css/styles.css") 
+    body
+        table
+            tr 
+                th= 'Name'
+                th= 'Email'
+                th= 'Phone' 
+                th= 'Country'
+            each user in data.results
+                tr 
+                    td= user.name.title + ' ' + user.name.first + ' ' + user.name.last
+                    td= user.email 
+                    td= user.phone
+                    td= user.location.country

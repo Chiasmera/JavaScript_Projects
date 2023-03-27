@@ -20,22 +20,32 @@ async function fetchXML (url) {
 }
 
 function getIDsFromCollection (xmlCollection) {
-    let parser = new DOMParser()
-    let xmlDoc = parser.parseFromString(xmlCollection, 'text/xml')
+    const parser = new DOMParser()
+    const xmlDoc = parser.parseFromString(xmlCollection, 'text/xml')
     let itemList = xmlDoc.getElementsByTagName('item')
+    const itemAttributeNames = itemList[0].getAttributeNames();
+    console.log(itemAttributeNames)
+    let boardGames = [];
+    for (let item of itemList) {
+        let game = {}
+        for (let name of itemAttributeNames) {
+            game.name = item.getAttribute(name)
+        }
+
+    }
 
 
     
-    return itemList[0]
+    return item[0].getAttributeNames()
 
 }
 
 async function main() {
     
     let output = await fetchXML(collectionURL)
-    let dom = getIDsFromCollection(output)
+    let ids = getIDsFromCollection(output)
 
-    console.log(dom);
+    console.log(ids);
 }
 
 main()
