@@ -12,14 +12,19 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static('assets'))
 
 const firebaseConfig = {
-
-}
+  apiKey: "AIzaSyB6EbtVD0j3BewfpJ8m0YNNlyAsk1u0kbM",
+  authDomain: "learningdemodip.firebaseapp.com",
+  projectId: "learningdemodip",
+  storageBucket: "learningdemodip.appspot.com",
+  messagingSenderId: "301346064961",
+  appId: "1:301346064961:web:ea6dc684d7ac93ab10d4c0"
+};
 
 const firebase_app = initializeApp(firebaseConfig)
 const db = getFirestore(firebase_app)
 
 // Firebase functioner
-let carsCollection = collection(db, 'cars')
+let carsCollection = collection(db, 'Cars')
 
 async function getCars() {
   let carsQueryDocs = await getDocs(carsCollection)
@@ -32,7 +37,7 @@ async function getCars() {
 }
 
 async function getCar(id) {
-  const docRef = doc(db, "cars", id)
+  const docRef = doc(db, "Cars", id)
   const carQueryDocument = await getDoc(docRef)
   let car = carQueryDocument.data()
   car.docID = carQueryDocument.id
@@ -40,7 +45,7 @@ async function getCar(id) {
 }
 
 async function deleteCar(id) {
-  const deletedCar = await deleteDoc(doc(db, "cars", id))
+  const deletedCar = await deleteDoc(doc(db, "Cars", id))
   //let car = deletedCar.data()
   //car.docID = deletedCar.id
   //return car
@@ -48,7 +53,7 @@ async function deleteCar(id) {
 
 async function addCar(car) {
   // car = {brand: 'Citroen', model: 'Xantia'}
-  const docRef = await addDoc(collection(db, "cars"), car);
+  const docRef = await addDoc(collection(db, "Cars"), car);
   return docRef.id
 }
 
@@ -85,7 +90,7 @@ app.post('/addCar', async (request, response) => {
   response.redirect('/cars')
 })
 
-app.listen(8000, () => {
+app.listen(3141, () => {
   console.log('Roads?, where we are going we dont need no roads')
 })
 
