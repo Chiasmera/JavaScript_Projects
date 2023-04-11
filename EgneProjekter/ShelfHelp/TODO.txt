@@ -1,0 +1,13 @@
+- Implementer fetching af user collection fra BGG
+    - Sørg for at den kun fetcher periodisk
+    - Byg en json parser
+    - fix CORS issues
+
+- Render brætspil på en pæn måde med udvalgt data
+    - Sørg for at man kan sortere efter kriterier
+    - Lav en søgefunktion
+
+-Implementer flere endpoints
+- lav en login funktion
+- Find et sted med info om brætspilsstørrelse
+- Gør det muligt for flere brugere at have collections
