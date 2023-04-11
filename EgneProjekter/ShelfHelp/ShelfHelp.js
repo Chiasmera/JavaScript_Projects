@@ -278,10 +278,9 @@ function findLanguageDependence(gameObject) {
  * Executes when the script is run
  * @param {*} url URl wor a user collection of board games
  */
-async function main (url) {
+async function main () {
     try {
-        await fetchCollection(url)
-        console.log(collection.games)
+        await fetchCollection(collectionURL)
             
         } catch (error) {
         console.log('Caught error: '+error)  
@@ -292,7 +291,7 @@ async function main (url) {
 }
 
 
-main(collectionURL)
+main()
 
 
 
