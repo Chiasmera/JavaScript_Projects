@@ -1,0 +1,33 @@
+body {
+    padding: 0%;
+    margin: 0%;
+}
+
+
+.header {
+    background-color:cadetblue;
+    height: 2vw;
+    text-align: center;
+}
+
+.listBox {
+    margin-left: 4vw;
+    margin-right: 4vw;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    border-left: solid;
+    border-bottom: solid;
+    border-right: solid;
+}
+
+td {
+    border-bottom: dashed;
+    border-color: gray;
+    padding: 1vw;
+    
+}

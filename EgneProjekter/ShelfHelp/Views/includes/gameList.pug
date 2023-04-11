@@ -1,0 +1,12 @@
+.listBox
+    h1 Chiasmeras Collection
+    table 
+        thead
+            tr
+                th ID
+                th Title
+        tbody
+            each game in games
+                tr
+                    td #{game.objectID} 
+                    td #{game.title}

@@ -1,7 +1,7 @@
-html 
-  head 
-    title ShelfHelp
-  body 
-    ul 
-      each game in games
-        li #{game.objectID} #{game.title}
+include includes/htmlHead
+
+
+body 
+  .header Update
+  
+  include includes/gameList

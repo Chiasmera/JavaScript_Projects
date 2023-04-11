@@ -5,11 +5,13 @@ const app = express()
 
 //Firebase import
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, getDocs, getDoc, doc, deleteDoc, addDoc } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, setDoc, getDoc, doc, deleteDoc, addDoc } from 'firebase/firestore'
 import { firebaseConfig } from './FB_Config.js'
 
 const firebase_app = initializeApp(firebaseConfig)
 const db = getFirestore(firebase_app)
+
+
 
 //Pug import
 import pug from 'pug'
@@ -42,5 +44,14 @@ async function getGames() {
     return games
 }
 
+async function addGame (game) {
+    let docRef = doc (db, 'GameCollection', game.objectID)
+    docRef = await setDoc(docRef, game, {merge:true})
+}
+
+
 //Server start  -----------------------------------------------------------------------------------------
 app.listen(3141, ()=> console.log('server running on port 3141'))
+
+const tempGame = {title: 'testosterone', objectID: '12345678'}
+let id = addGame(tempGame)
