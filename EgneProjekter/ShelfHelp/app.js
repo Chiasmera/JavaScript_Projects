@@ -1,6 +1,9 @@
 //IMPORTS  -------------------------------------------------------------------------------------------
+//node-fetch import
+import fetch from 'node-fetch'
+
 //Express import
-import express, { response } from 'express'
+import express from 'express'
 const app = express()
 
 //Firebase import
@@ -55,3 +58,13 @@ app.listen(3141, ()=> console.log('server running on port 3141'))
 
 const tempGame = {title: 'testosterone', objectID: '12345678'}
 let id = addGame(tempGame)
+
+function main () {
+    console.log(fetchGame("https://boardgamegeek.com/xmlapi2/thing?id=247048"))
+}
+
+async function fetchGame (url) {
+    let gameJSON = await fetch(url)
+    return gameJSON
+
+}

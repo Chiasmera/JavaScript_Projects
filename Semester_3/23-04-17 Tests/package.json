@@ -1,0 +1,15 @@
+{
+  "name": "l17-test",
+  "version": "0.0.1",
+  "description": "Testframeworks",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "ksd",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
+  }
+}
