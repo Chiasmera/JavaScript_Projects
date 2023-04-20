@@ -3,6 +3,7 @@
 //collection API link: /collection?username=NAME&excludesubtype=boardgameexpansion
 //ting retrieval API link: /xmlapi2/thing?parameters
 
+
 let username = 'LuciusWriter'
 const collectionURL = `https://boardgamegeek.com/xmlapi2/collection?username=${username}&excludesubtype=boardgameexpansion`
 let itemArray;
