@@ -8,5 +8,8 @@
         tbody
             each game in games
                 tr
-                    td #{game.objectID} 
-                    td #{game.title}
+                    td #{game.items.item['@_id']}
+                    if  game.items.item.name.length > 1
+                        td #{game.items.item.name[0]['@_value']}
+                    else 
+                        td #{game.items.item.name['@_value']}
