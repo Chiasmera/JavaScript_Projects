@@ -24,7 +24,8 @@ app.set('view engine', 'pug')
 //fast-xml-parser import
 const parserOptions = {
                         ignoreAttributes: false,
-                        parseAttributeValue: true
+                        parseAttributeValue: true,
+                        attributeNamePrefix: "",
                     }
 import { XMLParser } from 'fast-xml-parser'
 
@@ -65,7 +66,7 @@ async function getDBGamesIDs () {
 }
 
 async function addGameToDB (gameObject) {
-    const id = gameObject.items.item['@_id']
+    const id = gameObject.items.item.id
     await setDoc(doc(db, "GameCollection", String(id)), gameObject, {merge: true});
 
 }
@@ -82,7 +83,7 @@ async function fetchXML(url) {
        console.log('Server busy, retrying in 10 seconds')
 
    } else if (response.status !== 200) {
-       throw new Error("Failed fetching collection CML data.. Status: "+response.status)
+       throw new Error("Failed fetching collection CML data.. Status: "+response.status+", "+response.text())
    }
    return await response.text()
 }
@@ -106,7 +107,7 @@ async function bggSync (username) {
     const collectionXML = await fetchXML(`https://boardgamegeek.com/xmlapi2/collection?username=${username}&excludesubtype=boardgameexpansion`)
     const collectionObject = await parseXMLToObject(collectionXML)
     //extract objectIDs from collection
-    const bggIDs = collectionObject.items.item.map( (item) => item['@_objectid'] )
+    const bggIDs = collectionObject.items.item.map( (item) => item.objectid )
 
     //Get all IDs in database
     const dbIDs = await getDBGamesIDs();
@@ -144,6 +145,10 @@ async function bggSync (username) {
 async function main () {
 
     await bggSync(username)  
+    // let xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/thing?id=105`)
+    // console.log(xml);
+    // let object = await parseXMLToObject(xml)
+    // console.log(object);
     
 }
 
