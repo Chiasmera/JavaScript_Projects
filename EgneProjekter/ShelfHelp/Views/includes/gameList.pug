@@ -4,12 +4,34 @@
         thead
             tr
                 th ID
-                th Title
+                th Image
+                th Title 
+                th 
+                    p Players
+                    p (recommended)
+                th Playtime
         tbody
             each game in games
                 tr
-                    td #{game.items.item.id}
-                    if  game.items.item.name.length > 1
-                        td #{game.items.item.name[0].value}
+                    td #{gameid}
+
+                    td 
+                        a(href=`https://boardgamegeek.com/boardgame/${game.id}`, target="_blank")
+                            img(src=game.thumbnail) 
+
+                    td #{game.title}
+                    
+                    
+
+                    if game.minPlayers === game.maxPlayers
+                        td #{`${game.minPlayers}`}
                     else 
-                        td #{game.items.item.name.value}
+                        td #{`${game.minPlayers} - ${game.maxPlayers} (${game.bestPlayers})`}
+
+
+
+                    if game.minTime === game.maxTime
+                        td #{`${game.maxTime} min`}
+                    else 
+                        td #{`${game.minTime}-${game.maxTime} min`}
+                    
