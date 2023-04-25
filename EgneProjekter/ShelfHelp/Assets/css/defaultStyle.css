@@ -10,9 +10,10 @@ img {
 
 
 .header {
-    background-color:cadetblue;
-    height: 2vw;
-    text-align: center;
+    background-color:rgb(112, 184, 187);
+    height: 4vw;
+    text-align: right;
+    vertical-align: middle;
 }
 
 .listBox {
@@ -37,4 +38,57 @@ td {
     overflow: hidden;
    
     
+}
+
+/* CSS */
+.updateButton {
+  appearance: none;
+  background-color: #2c8297;
+  border: 1px solid rgba(27, 31, 35, .15);
+  border-radius: 6px;
+  box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  padding: 6px 16px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  white-space: nowrap;
+  margin: 1vw;
+}
+
+.updateButton:focus:not(:focus-visible):not(.focus-visible) {
+  box-shadow: none;
+  outline: none;
+}
+
+.updateButton:hover {
+  background-color: #2c8297;
+}
+
+.updateButton:focus {
+  box-shadow: rgba(46, 77, 164, 0.4) 0 0 0 3px;
+  outline: none;
+}
+
+.updateButton:disabled {
+  background-color: #94d3a2;
+  border-color: rgba(27, 31, 35, .1);
+  color: rgba(255, 255, 255, .8);
+  cursor: default;
+}
+
+.updateButton:active {
+  background-color: #2c8297;
+  box-shadow: rgba(20, 70, 32, .2) 0 1px 0 inset;
 }

@@ -45,6 +45,13 @@ app.get('/', async (req, res)=> {
     
 })
 
+app.get('/test', async (req, res)=> {
+    const games = await getGames();
+    res.redirect('/')
+    
+})
+
+
 
 //Functions----------------------------------------------------------------------------------------------
 async function getGames() {

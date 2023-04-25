@@ -3,7 +3,7 @@
     table 
         thead
             tr
-                th ID
+                th #
                 th Image
                 th Title 
                 th 
@@ -11,9 +11,10 @@
                     p (recommended)
                 th Playtime
         tbody
-            each game in games
+            - let count = 1
+            each game, index in games
                 tr
-                    td #{gameid}
+                    td #{index+1}
 
                     td 
                         a(href=`https://boardgamegeek.com/boardgame/${game.id}`, target="_blank")
