@@ -93,7 +93,7 @@ async function fetchXML(url) {
         console.log('request rate limited by server, retrying in 5 seconds');
         response = await setTimeout(fetchXML(url),5000)
     } else if (response.status !== 200) {
-        throw new Error("Failed fetching collection CML data. Status: "+response.status)
+        throw new Error("Failed fetching collection XML data. Status: "+response.status)
    }
    return await response.text()
 }
