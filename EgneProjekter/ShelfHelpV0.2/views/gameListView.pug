@@ -1,0 +1,28 @@
+html
+    head 
+        meta(charset="UTF-16")
+        title Game List
+        meta(name="viewport", content="width=device-width, initial-scale=1")
+        link(rel="stylesheet", type='text/css', href="css/gameListstyle.css")
+        //- script(src='/js/adminGameOverview.js' defer)
+        
+    body 
+        each game in games 
+            .listItemContainer
+                img(src=game.thumbnail, class="thumbnail")
+                .title= game.title
+                .mechanics
+                    each mechanic in game.mechanics
+                        .mechanic= mechanic
+
+                .statsContainer
+                    if game.minPlayers === game.maxPlayers
+                        .players= `${game.minPlayers} players`
+                    else 
+                        .players= `${game.minPlayers} - ${game.maxPlayers} (${game.bestPlayers}) players`
+                    if game.minTime === game.maxTime
+                        .time= `${game.minTime} minutes`
+                    else 
+                        .time= `${game.minTime} - ${game.maxTime} minutes`
+                    .weight= `${game.weight} weight`
+                    .rating= `${game.rating} rating`

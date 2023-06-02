@@ -23,9 +23,12 @@ app.use(express.static('assets'))
 const testGetGame = await getGame(173346)
 
 app.get('/', (req, res) => {
-    res.render('gameList', {test: testGetGame})
+    res.render('gameListView', {games: {test: testGetGame}})
 })
 
+app.get('/', (req, res) => {
+    res.render('shelfOrganizerView', {test: testGetGame})
+})
 
 app.listen(3141, console.log('Server running on port 3141'))
 
