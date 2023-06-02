@@ -44,9 +44,12 @@ async function getGame (id) {
         description: gameObject.items.item.description,
         publishYear: gameObject.items.item.yearpublished.value,
         minAge: gameObject.items.item.minage.value,
-        mechanics: []
-
+        mechanics: [],
+        averageRating: gameObject.items.item.statistics.ratings.average.value,
+        rank:  gameObject.items.item.statistics.ratings.ranks.rank[0].value,
+        weight:  gameObject.items.item.statistics.ratings.averageweight.value
     }
+    
     //Assign title
     if (Array.isArray(gameObject.items.item.name)) {
         simplifiedObject.title = gameObject.items.item.name[0].value
@@ -119,4 +122,34 @@ async function fetchFromBGG(url) {
    return await response.text()
 }
 
-export {getGame, getCollectionIDs}
+/**
+ * syncs the database with the collection of the given user on BGG. Will add any new games to DB, and 
+ * remove games no longer present in collection. If fullSync is true, will also compare each game for 
+ * changes and update fields where needed
+ * @param {String} username name of the user that owns the collection
+ * @param {Boolean} fullSync boolean argument, if true the functions also syncs every field on every game.
+ * @returns an object with properties removedGames and addedGames, containing the number of games added and removed
+ */
+async function synchronizeCollection (username, fullSync) {
+    let added = 0;
+    let removed = 0;
+
+    //Get IDs for games in collection
+    const collectionIDs = getCollectionIDs(username)
+
+    //compare with IDs in DB
+    //For each not in collection, but in DB
+        //remove game in DB
+
+    //if fullSync true
+        //For each game in collection
+            //fetch game info
+            //add/update entry
+    //else
+        //For each not in DB, but in collection
+            //fetch the game information
+            //add the game to DB   
+    return {addedGames: added, removedGames: removed}
+}
+
+export {getGame, synchronizeCollection}

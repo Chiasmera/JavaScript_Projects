@@ -1,5 +1,5 @@
 //IMPORTS  -------------------------------------------------------------------------------------------
-import { getGame, getCollectionIDs } from './BGG_Controller.js';
+import { getGame, synchronizeCollection } from './BGG_Controller.js';
 
 
 //express import
@@ -33,6 +33,7 @@ app.get('/', (req, res) => {
 app.listen(3141, console.log('Server running on port 3141'))
 
 
-async function main () {
+async function synchronizeWithDB () {
+
 }
-main()
+synchronizeWithDB()
