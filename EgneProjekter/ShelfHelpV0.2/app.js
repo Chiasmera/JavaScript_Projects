@@ -1,5 +1,5 @@
 //IMPORTS  -------------------------------------------------------------------------------------------
-import { getGame} from './BGG_Controller.js';
+import { synchronizeCollection } from './FireBase_Controller.js';
 
 
 //express import
@@ -21,8 +21,6 @@ app.set('view engine', 'pug')
 //Middleware
 app.use(express.static('assets'))
 
-// const testGetGame = await getGame(173346)
-
 app.get('/', async (req, res) => {
     const allGames = await getGamesFromDB()
     res.render('gameListView', {games: allGames})
@@ -36,6 +34,8 @@ app.listen(3141, console.log('Server running on port 3141'))
 
 
 async function synchronizeWithDB () {
-
+    console.log('Synchronizing with BGG');
+    const syncStats = await synchronizeCollection('LuciusWriter', false)
+    console.log(`Database synchronized. ${syncStats.addedGames} added or updated, ${syncStats.removedGames} removed.`);
 }
 synchronizeWithDB()
