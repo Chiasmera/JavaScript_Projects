@@ -1,5 +1,5 @@
 //IMPORTS  -------------------------------------------------------------------------------------------
-import { getGame, synchronizeCollection } from './BGG_Controller.js';
+import { getGame} from './BGG_Controller.js';
 
 
 //express import
@@ -10,6 +10,7 @@ const app = express();
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, getDocs, setDoc, getDoc, doc, deleteDoc, addDoc } from 'firebase/firestore'
 import { firebaseConfig } from './FB_Config.js'
+import { addGameToDB, getGamesFromDB, deleteGameFromDB, getIDsFromDB } from './FireBase_Controller.js';
 
 const firebase_app = initializeApp(firebaseConfig)
 const db = getFirestore(firebase_app)
@@ -20,13 +21,14 @@ app.set('view engine', 'pug')
 //Middleware
 app.use(express.static('assets'))
 
-const testGetGame = await getGame(173346)
+// const testGetGame = await getGame(173346)
 
-app.get('/', (req, res) => {
-    res.render('gameListView', {games: {test: testGetGame}})
+app.get('/', async (req, res) => {
+    const allGames = await getGamesFromDB()
+    res.render('gameListView', {games: allGames})
 })
 
-app.get('/', (req, res) => {
+app.get('/shelf', (req, res) => {
     res.render('shelfOrganizerView', {test: testGetGame})
 })
 
