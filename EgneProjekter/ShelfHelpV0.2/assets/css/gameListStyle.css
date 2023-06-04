@@ -5,9 +5,9 @@ body {
 
 .listItemContainer {
     display: grid;
-    grid-template-areas:    "title stats";
-    grid-template-columns: 1fr 7rem;
-    background-color: rgb(237, 244, 247);
+    grid-template-areas:    "index title stats";
+    grid-template-columns: 2rem 1fr 7rem;
+    background-color: rgb(255, 255, 255);
     height: auto;
     padding: 0%;
     margin: 0%;
@@ -15,6 +15,13 @@ body {
 
 .listItemContainer:nth-child(even) {
     background-color: rgb(237, 244, 247);
+}
+
+
+.index{
+    grid-area: index;
+    margin: auto;
+    font-size: 1rem;
 }
 
 .thumbnail {
@@ -31,9 +38,9 @@ body {
     grid-area: title;
     font-size: 1.5rem;
     font-weight: bold;
-    margin: auto;
+    margin: auto 0rem;
     padding: auto;
-    text-align: center;
+    text-align: left;
 }
 
 .mechanics {
@@ -62,13 +69,33 @@ body {
     margin: auto 0rem;
 }
 
+.ratingsContainer {
+    grid-area: ratings;
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 0.1rem;
+}
+
+.ratingsContainer > div {
+    background-color: rgb(252, 212, 212);
+    border-style: solid;
+    border-radius: 1rem;
+    height: 2rem; 
+    font-size: 0.75rem;
+    padding: 0.25rem 0.25rem;
+    text-align: center;
+    height: fit-content;
+    margin: auto 0rem;
+}
+
+
 /*For Large Screens*/
 @media screen and (min-width: 600px) {
     .listItemContainer {
         display: grid;
-        grid-template-areas:    "thumbnail title stats"
-                                "thumbnail mechanics stats";
-        grid-template-columns: 8rem 1fr 8rem;
+        grid-template-areas:    "index thumbnail title title stats"
+                                "index thumbnail ratings mechanics stats";
+        grid-template-columns: 2rem 8rem 1fr 2fr 8rem;
         column-gap: 1rem;
         background-color: rgb(212, 235, 243);
         height: fit-content;
@@ -80,13 +107,13 @@ body {
         display: block;
         grid-area: thumbnail;
         max-height: 13vh;
-        max-width: 15vw;
+        max-width: 8rem;
         margin: auto;
         padding: 0rem 0.0rem 0rem 0.25rem;
     }
 
     .mechanics {
-        display: block;
+        display: inline-block;
         grid-area: mechanics;
     }
     
@@ -103,13 +130,11 @@ body {
     }
 
     .title {
-        text-align: left;
         margin: auto 0rem;
 
     }
 
     .statsContainer > div {
-        background-color: rgb(252, 212, 212);
         border-style: solid;
         border-radius: 1rem 0rem 0rem 1rem;
         height: 2rem;

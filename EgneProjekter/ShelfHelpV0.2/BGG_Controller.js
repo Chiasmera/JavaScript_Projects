@@ -66,7 +66,7 @@ async function getGame (id) {
         }
 
         //calculate best number of player
-        let pollBestPlayers = {number: 'no result', weight: 0}
+        let pollBestPlayers = {number: '', weight: 0}
         if (Array.isArray(gameObject.items.item.poll[0].results)) {
             for (let results of gameObject.items.item.poll[0].results) {
                 let weight = ((results.result[0].numvotes*1.5) + results.result[1].numvotes - results.result[2].numvotes)
@@ -82,7 +82,7 @@ async function getGame (id) {
 
 
         //calculate language dependency
-        let pollLanguageDep = {desc: 'no result', weight: 0}
+        let pollLanguageDep = {desc: '', weight: 0}
         if (gameObject.items.item.poll[2].results && Array.isArray(gameObject.items.item.poll[2].results.result)) {
             for (let results of gameObject.items.item.poll[2].results.result) {
                 if (results.numvotes > pollLanguageDep.weight) {
