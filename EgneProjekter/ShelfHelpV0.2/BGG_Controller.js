@@ -1,6 +1,7 @@
 //IMPORTS  -------------------------------------------------------------------------------------------
 //node-fetch import
 import fetch from 'node-fetch'
+import he from 'he'
 
 //fast-xml-parser import
 const parserOptions = {
@@ -63,7 +64,7 @@ async function getGame (id) {
             minTime: gameObject.items.item.minplaytime.value,
             maxTime: gameObject.items.item.maxplaytime.value,
             officialTime: gameObject.items.item.playingtime.value,
-            description: String(decodeURI(gameObject.items.item.description)),
+            description: String(he.decode(gameObject.items.item.description)),
             publishYear: gameObject.items.item.yearpublished.value,
             minAge: gameObject.items.item.minage.value,
             mechanics: [],
@@ -74,11 +75,11 @@ async function getGame (id) {
 
         //Assign title
         if (Array.isArray(gameObject.items.item.name)) {
-            simplifiedObject.title = decodeURI(gameObject.items.item.name[0].value)
+            simplifiedObject.title = he.decode(gameObject.items.item.name[0].value)
         } else if (typeof gameObject.items.item.name === 'object') {
-            simplifiedObject.title = decodeURI(gameObject.items.item.name.value)
+            simplifiedObject.title = he.decode(gameObject.items.item.name.value)
         } else {
-            simplifiedObject.title = decodeURI(gameObject.items.item.name)
+            simplifiedObject.title = he.decode(gameObject.items.item.name)
         }
 
         //calculate best number of player
@@ -102,7 +103,7 @@ async function getGame (id) {
         if (gameObject.items.item.poll[2].results && Array.isArray(gameObject.items.item.poll[2].results.result)) {
             for (let results of gameObject.items.item.poll[2].results.result) {
                 if (results.numvotes > pollLanguageDep.weight) {
-                    pollLanguageDep.desc = decodeURI(results.value)
+                    pollLanguageDep.desc = he.decode(results.value)
                     pollLanguageDep.weight = results.numvotes
                 }
             }
@@ -116,7 +117,7 @@ async function getGame (id) {
 
         for (let link of gameObject.items.item.link) {
             if (link.type === "boardgamemechanic")
-            simplifiedObject.mechanics.push(decodeURI(link.value))
+            simplifiedObject.mechanics.push(he.decode(link.value))
         }
 
         //Assign rank

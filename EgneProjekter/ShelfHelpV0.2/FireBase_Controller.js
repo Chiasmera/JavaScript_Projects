@@ -111,9 +111,7 @@ async function synchronizeCollection (username, fullSync) {
                 try {
                     const currentGame = await getGame(collectionIDs[0])
                     let object = collection.find( (object) => object.id === collectionIDs[0] )
-                    
                     currentGame.boxSize = object.boxSize
-                    console.log(currentGame);
                     await addGameToDB(currentGame)
                     collectionIDs.shift()
                     added++
