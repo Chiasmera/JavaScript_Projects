@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, getDocs, setDoc, doc, deleteDoc, collection} from 'firebase/firestore'
 import { firebaseConfig } from './FB_Config.js'
-import { getCollectionIDs, getGame } from './BGG_Controller.js'
+import { getCollection, getGame } from './BGG_Controller.js'
 
 const firebase_app = initializeApp(firebaseConfig)
 const db = getFirestore(firebase_app)
@@ -68,7 +68,9 @@ async function synchronizeCollection (username, fullSync) {
     let removed = 0;
 
     //Get IDs for games in collection
-    const collectionIDs = await getCollectionIDs(username)
+    let collection = await getCollection(username)
+    let collectionIDs = collection.map( (object) => object.id )
+    collectionIDs = [...new Set(collectionIDs)]
 
     //Get IDS from DB
     const DBIDs = await getIDsFromDB()
@@ -85,7 +87,10 @@ async function synchronizeCollection (username, fullSync) {
                 //if fullSync is true, merge the new game into db anyway
                 if (fullSync) {
                     try {
+                        await new Promise(r => setTimeout(r, 1000));
                         const currentGame = await getGame(collectionIDs[0])
+                        let object = collection.find( (object) => object.id === collectionIDs[0] )
+                        currentGame.boxSize = object.boxSize
                         await addGameToDB(currentGame)
                         added++
                     } catch (error) {
@@ -105,6 +110,10 @@ async function synchronizeCollection (username, fullSync) {
             } else if (collectionIDs[0] < DBIDs[0]) {
                 try {
                     const currentGame = await getGame(collectionIDs[0])
+                    let object = collection.find( (object) => object.id === collectionIDs[0] )
+                    
+                    currentGame.boxSize = object.boxSize
+                    console.log(currentGame);
                     await addGameToDB(currentGame)
                     collectionIDs.shift()
                     added++
@@ -132,6 +141,8 @@ async function synchronizeCollection (username, fullSync) {
         while (collectionIDs.length > 0) {
            try {
                 const currentGame = await getGame(collectionIDs[0])
+                let object = collection.find( (object) => object.id === collectionIDs[0] )
+                currentGame.boxSize = object.boxSize
                 await addGameToDB(currentGame)
                 collectionIDs.shift()
                 added++

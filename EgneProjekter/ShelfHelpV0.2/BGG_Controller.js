@@ -16,12 +16,28 @@ import { XMLParser } from 'fast-xml-parser'
  * @param {String} userName 
  * @returns An array of IDs
  */
- async function getCollectionIDs (userName) {
-    const collection = await fetchFromBGG(`https://boardgamegeek.com/xmlapi2/collection?username=${userName}&excludesubtype=boardgameexpansion`)
+ async function getCollection (userName) {
+    const collection = await fetchFromBGG(`https://boardgamegeek.com/xmlapi2/collection?username=${userName}&excludesubtype=boardgameexpansion&version=1`)
     const parsedCollection = await parseXML(collection)
-    let ids = parsedCollection.items.item.map( (item) => String(item.objectid) )
-    ids = [...new Set(ids)]
-    return ids
+    let simpleCollection = parsedCollection.items.item.map( (item) => {
+        let object = {
+            id: String(item.objectid),
+            boxSize: {
+                width:30,
+                length:30,
+                depth:7.5,                
+
+            }
+        }
+        if (item.hasOwnProperty('version')) {
+            object.boxSize.width = item.version.item.width.value
+            object.boxSize.length = item.version.item.length.value
+            object.boxSize.depth = item.version.item.depth.value
+        }
+        return object
+    } )
+
+    return simpleCollection
 }
 
 /**
@@ -47,7 +63,7 @@ async function getGame (id) {
             minTime: gameObject.items.item.minplaytime.value,
             maxTime: gameObject.items.item.maxplaytime.value,
             officialTime: gameObject.items.item.playingtime.value,
-            description: gameObject.items.item.description,
+            description: String(decodeURI(gameObject.items.item.description)),
             publishYear: gameObject.items.item.yearpublished.value,
             minAge: gameObject.items.item.minage.value,
             mechanics: [],
@@ -58,11 +74,11 @@ async function getGame (id) {
 
         //Assign title
         if (Array.isArray(gameObject.items.item.name)) {
-            simplifiedObject.title = gameObject.items.item.name[0].value
+            simplifiedObject.title = decodeURI(gameObject.items.item.name[0].value)
         } else if (typeof gameObject.items.item.name === 'object') {
-            simplifiedObject.title = gameObject.items.item.name.value
+            simplifiedObject.title = decodeURI(gameObject.items.item.name.value)
         } else {
-            simplifiedObject.title = gameObject.items.item.name
+            simplifiedObject.title = decodeURI(gameObject.items.item.name)
         }
 
         //calculate best number of player
@@ -86,7 +102,7 @@ async function getGame (id) {
         if (gameObject.items.item.poll[2].results && Array.isArray(gameObject.items.item.poll[2].results.result)) {
             for (let results of gameObject.items.item.poll[2].results.result) {
                 if (results.numvotes > pollLanguageDep.weight) {
-                    pollLanguageDep.desc = results.value
+                    pollLanguageDep.desc = decodeURI(results.value)
                     pollLanguageDep.weight = results.numvotes
                 }
             }
@@ -100,7 +116,7 @@ async function getGame (id) {
 
         for (let link of gameObject.items.item.link) {
             if (link.type === "boardgamemechanic")
-            simplifiedObject.mechanics.push(link.value)
+            simplifiedObject.mechanics.push(decodeURI(link.value))
         }
 
         //Assign rank
@@ -166,4 +182,4 @@ async function fetchFromBGG(url) {
 
 
 
-export {getGame, getCollectionIDs}
+export {getGame, getCollection}
