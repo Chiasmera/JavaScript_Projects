@@ -37,6 +37,6 @@ async function synchronizeWithDB () {
     const syncStats = await synchronizeCollection('LuciusWriter', false)
     console.log(`Database synchronized. ${syncStats.addedGames} added or updated, ${syncStats.removedGames} removed.`);
 }
-synchronizeWithDB()
+await synchronizeWithDB()
 
 app.listen(3141, console.log('Server running on port 3141'))

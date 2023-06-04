@@ -19,7 +19,8 @@ import { XMLParser } from 'fast-xml-parser'
  async function getCollectionIDs (userName) {
     const collection = await fetchFromBGG(`https://boardgamegeek.com/xmlapi2/collection?username=${userName}&excludesubtype=boardgameexpansion`)
     const parsedCollection = await parseXML(collection)
-    const ids = parsedCollection.items.item.map( (item) => String(item.objectid) )
+    let ids = parsedCollection.items.item.map( (item) => String(item.objectid) )
+    ids = [...new Set(ids)]
     return ids
 }
 

@@ -12,8 +12,9 @@ html
                 img(src=game.thumbnail, class="thumbnail")
                 .title= game.title
                 .mechanics
-                    each mechanic in game.mechanics
-                        .mechanic= mechanic
+                    if Array.isArray(mechanics)
+                        each mechanic in game.mechanics
+                            .mechanic= mechanic
 
                 .statsContainer
                     if game.minPlayers === game.maxPlayers

@@ -16,9 +16,11 @@ const username = 'LuciusWriter'
  */
 async function getIDsFromDB () {
     const gameDocs = await getDocs(dbGameCollection)
-    const gamesIDs = gameDocs.docs.map( (gameDoc)=> {
+    let gamesIDs = gameDocs.docs.map( (gameDoc)=> {
         return String(gameDoc.id)
     })
+    gamesIDs = [...new Set(gamesIDs)]
+
     return gamesIDs
 }
 
@@ -76,30 +78,20 @@ async function synchronizeCollection (username, fullSync) {
         collectionIDs.sort()
         DBIDs.sort()
 
-        //Create counters to manage position in lists
-        let collCounter = 0;
-        let dbCounter = 0;
-
-        // console.log(collectionIDs);
-        // console.log(dbCounter);
-
         //run while both lists still have unhandled elements
-        while (collCounter < collectionIDs.length && dbCounter < DBIDs.length) {
-
-
+        while (collectionIDs.length > 0 && DBIDs.length > 0) {
             //if both current elements are equal, do nothing, go on to next elements in both lists
-            if (collectionIDs[collCounter] === DBIDs[dbCounter]) {
-                collCounter++
-                dbCounter++
+            if (collectionIDs[0] === DBIDs[0]) {
                 //if fullSync is true, merge the new game into db anyway
                 if (fullSync) {
                     try {
-                        const currentGame = await getGame(collectionIDs[collCounter])
+                        const currentGame = await getGame(collectionIDs[0])
                         await addGameToDB(currentGame)
                         added++
                     } catch (error) {
                         if (error.status === 429) {
                             console.log(error);
+                            await new Promise(r => setTimeout(r, 1500));
                         }else if (error.status === 429) {
                             console.log(error);
                         } else {
@@ -107,14 +99,15 @@ async function synchronizeCollection (username, fullSync) {
                         }                        
                     }
                 }
+                collectionIDs.shift()
+                DBIDs.shift()
             //If the collection id is lesser, game does not exists in DB and should be added
-            } else if (collectionIDs[collCounter] < DBIDs[dbCounter]) {
+            } else if (collectionIDs[0] < DBIDs[0]) {
                 try {
-                    const currentGame = await getGame(collectionIDs[collCounter])
+                    const currentGame = await getGame(collectionIDs[0])
                     await addGameToDB(currentGame)
-                    collCounter++
+                    collectionIDs.shift()
                     added++
-                    console.log(`${collectionIDs[collCounter]} added, next is ${collectionIDs[collCounter+1]}, former is ${collectionIDs[collCounter-1]}`);
                 } catch (error) {
                     if (error.status === 429) {
                         console.log(error);
@@ -128,18 +121,19 @@ async function synchronizeCollection (username, fullSync) {
                 
             //otherwise, the db id is lesser, and game does not exist in collection. It should be removed
             } else {
-                await deleteGameFromDB(DBIDs[dbCounter])
-                dbCounter++
+                await deleteGameFromDB(DBIDs[0])
+                DBIDs.shift()
                 removed++
             }
         }
 
+
         //if there is still elements in collectionIDs, add those to the db
-        while (collCounter < collectionIDs.length) {
+        while (collectionIDs.length > 0) {
            try {
-                const currentGame = await getGame(collectionIDs[collCounter])
-                addGameToDB(currentGame)
-                collCounter++
+                const currentGame = await getGame(collectionIDs[0])
+                await addGameToDB(currentGame)
+                collectionIDs.shift()
                 added++
             } catch (error) {
                 if (error.status === 429) {
@@ -154,9 +148,9 @@ async function synchronizeCollection (username, fullSync) {
         }
 
         //If there is still elements in DBIDs, remove those from DB
-        while (dbCounter <= DBIDs.length) {
-            deleteGameFromDB(DBIDs[dbCounter])
-            dbCounter++
+        while (DBIDs.length > 0) {
+            await deleteGameFromDB(DBIDs[0])
+            DBIDs.shift()
             removed++
         }
     }
