@@ -114,10 +114,12 @@ async function synchronizeCollection (username, fullSync) {
                     await addGameToDB(currentGame)
                     collCounter++
                     added++
+                    console.log(`${collectionIDs[collCounter]} added, next is ${collectionIDs[collCounter+1]}, former is ${collectionIDs[collCounter-1]}`);
                 } catch (error) {
                     if (error.status === 429) {
                         console.log(error);
-                    }else if (error.status === 429) {
+                        await new Promise(r => setTimeout(r, 1500));
+                    }else if (error.status === 202) {
                         console.log(error);
                     } else {
                         console.log(error);
@@ -138,9 +140,11 @@ async function synchronizeCollection (username, fullSync) {
                 const currentGame = await getGame(collectionIDs[collCounter])
                 addGameToDB(currentGame)
                 collCounter++
+                added++
             } catch (error) {
                 if (error.status === 429) {
                     console.log(error);
+                    await new Promise(r => setTimeout(r, 1500));
                 }else if (error.status === 429) {
                     console.log(error);
                 } else {
@@ -153,6 +157,7 @@ async function synchronizeCollection (username, fullSync) {
         while (dbCounter <= DBIDs.length) {
             deleteGameFromDB(DBIDs[dbCounter])
             dbCounter++
+            removed++
         }
     }
 

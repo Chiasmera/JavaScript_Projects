@@ -27,10 +27,9 @@ app.get('/', async (req, res) => {
 })
 
 app.get('/shelf', (req, res) => {
+    
     res.render('shelfOrganizerView', {test: testGetGame})
 })
-
-app.listen(3141, console.log('Server running on port 3141'))
 
 
 async function synchronizeWithDB () {
@@ -39,3 +38,5 @@ async function synchronizeWithDB () {
     console.log(`Database synchronized. ${syncStats.addedGames} added or updated, ${syncStats.removedGames} removed.`);
 }
 synchronizeWithDB()
+
+app.listen(3141, console.log('Server running on port 3141'))
