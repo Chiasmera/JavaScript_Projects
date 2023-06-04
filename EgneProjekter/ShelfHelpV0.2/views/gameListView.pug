@@ -7,6 +7,7 @@ html
         //- script(src='/js/adminGameOverview.js' defer)
         
     body
+        -sortBy(games, 'time')
         each game, index in games 
             .listItemContainer
                 .index=index

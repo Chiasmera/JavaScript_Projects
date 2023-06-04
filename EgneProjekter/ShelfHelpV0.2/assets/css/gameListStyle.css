@@ -36,7 +36,7 @@ body {
 
 .title {
     grid-area: title;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     margin: auto 0rem;
     padding: auto;
@@ -125,7 +125,7 @@ body {
         border-width: 1px;
         border-style: solid;
         border-radius: 0.75rem;
-        font-size: 0.75rem;
+        font-size: 0.5rem;
         font-style: italic;
     }
 
@@ -144,6 +144,12 @@ body {
         text-align: right;
         height: fit-content;
         margin: auto 0rem;
+    }
+
+    .ratingsContainer {
+
+        display: grid;
+
     }
 
 }
