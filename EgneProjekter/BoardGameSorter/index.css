@@ -1,0 +1,26 @@
+table {
+    border-style: solid;
+}
+
+/* tr {
+    width : 7vw;
+    height: 7vw;
+} */
+
+td {
+    width: 7rem;
+    max-width: 7rem;
+    height: 7rem;
+    max-height: 7rem;
+    border-style: groove;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+}
+
+td > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
