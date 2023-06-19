@@ -1,0 +1,22 @@
+STATS
+x A player should have different stats
+- Stats should have values ranging from 1-30
+
+DICE
+- X different types of dice should be available, possibly with variants (lv1, 2 and 3?)
+    - Dice should be generated to reflect stats.
+
+ROLLING DICE
+- Should be possible to select dice from pool, then roll them
+    - Dice rolled should be removed from pool or 'exhausted'
+    - Pool should reset after a roll, if it is empty
+
+DICE POOL
+- Should be possible to construct a pool of dice
+    - Stats determine which and how many dice are available in the pool
+
+SKILLS
+- Should show cards/a list of actions or skills
+    - Actions or skills should show grade of success or failure, depending on rolled result
+    - Attacks and other opposed checks should be able to be reduced by enemy roll/defence
+

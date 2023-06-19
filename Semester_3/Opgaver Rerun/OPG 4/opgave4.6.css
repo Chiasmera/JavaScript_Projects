@@ -1,0 +1,20 @@
+h1 {
+    color: red
+}
+
+table {
+    border-collapse: collapse;
+
+}
+
+table > tr:first-child{
+    border: 0.25rem solid blue;
+}
+
+td {
+    border: 0.25rem solid blue;
+}
+
+td:nth-child(2) {
+    text-align: right;
+}

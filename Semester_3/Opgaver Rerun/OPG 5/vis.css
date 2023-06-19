@@ -1,0 +1,15 @@
+body {
+    display: grid;
+    grid-template-columns: 10rem;
+    grid-template-rows: 2rem;
+    gap: 5px;
+}
+
+label {
+    display: inline-block;
+}
+
+input {
+    display: inline-block;
+    width: 5rem;
+}
