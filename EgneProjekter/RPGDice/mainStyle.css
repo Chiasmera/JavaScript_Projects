@@ -1,0 +1,19 @@
+.die {
+    display: inline-block;
+    border-radius: 0.5rem;
+    min-width: 6vh;
+    max-width: 6vh;
+    min-height: 6vh;
+    max-height: 6vh;
+    text-align: center;
+    padding: 0.5vh;
+    margin: auto;
+    font-size: 5vh;
+    border: 0.5vh outset grey;
+    font-weight: bold;
+}
+
+.die > img {
+    max-width: 100%;
+    max-height: 100%;
+}

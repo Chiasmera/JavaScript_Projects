@@ -1,3 +1,24 @@
+//diceColors
+const diceColours = {
+    red: ['rgb(255, 100, 100)', 'rgb(255, 255, 255)'],
+    green:['rgb(100, 255, 100)', 'rgb(0, 0, 0)'],
+    blue:['rgb(100, 100, 255)', 'rgb(255, 255, 255)'],
+    yellow:['rgb(255, 255, 100)', 'rgb(0, 0, 0)'],
+    purple:['rgb(255, 100, 255)', 'rgb(255, 255, 255)'],
+    teal:['rgb(100, 255, 255)', 'rgb(0, 0, 0)'],
+    white:['rgb(255, 255, 255)', 'rgb(0, 0, 0)'],
+    black:['rgb(0, 0, 0)', 'rgb(255, 255, 255)']
+}
+
+const statColours = {
+    str: ['assets/str.png', diceColours.red],
+    dex:['assets/dex.png', diceColours.teal],
+    con:['assets/end.png', diceColours.green],
+    int:['assets/int.png', diceColours.blue],
+    wis:['assets/wis.png', diceColours.purple],
+    cha:['assets/cha.png', diceColours.yellow]
+}
+
 const body = document.body
 
 //Create dividers for main layout
@@ -20,7 +41,7 @@ body.appendChild(dicePool)
 //Status bar contents
 const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
-stats.forEach( (element, index, array) => {
+stats.forEach( (element) => {
     const stat = document.createElement('div')
     stat.setAttribute('id', element)
     stat.setAttribute('class', 'attribute')
@@ -32,11 +53,20 @@ stats.forEach( (element, index, array) => {
 
     const statNumber = document.createElement('input')
     statNumber.setAttribute('type', 'number')
-    statNumber.value = 0;
-    statNumber.style.backgroundColor = `rgb(${(255/array.length*(index+1))}, ${(255-(255/array.length*(index+1)))}, ${150})`
+    statNumber.setAttribute('min', 0)
+    statNumber.setAttribute('max', 30)
+    statNumber.value = 10;
+    statNumber.style.backgroundColor = statColours[`${element}`][1][0]
+
+    statNumber.addEventListener('change', (event)=>{ 
+        if (event.target.value > 30) {
+            event.target.value = 30
+        } else if(event.target.value < 0) {
+            event.target.value = 0
+        }})
     stat.appendChild(statNumber)
 
-    stat.style.backgroundColor = `rgb(${(255/array.length*(index+1))}, ${(255-(255/array.length*(index+1)))}, ${150})`
+    stat.style.backgroundColor = statColours[`${element}`][1][0]
     statusBar.appendChild(stat)
 })
 
