@@ -356,31 +356,31 @@ function calcDieResults() {
     // console.log(rollValue)
 }
 
-poolDice[0].toggleSide()
+// poolDice[0].toggleSide()
 // poolDice[1].toggleSide()
 // poolDice[2].toggleSide()
-poolDice[3].toggleSide()
+// poolDice[3].toggleSide()
 // poolDice[4].toggleSide()
 // poolDice[5].toggleSide()
-poolDice[6].toggleSide()
+// poolDice[6].toggleSide()
 // poolDice[9].toggleSide()
 // poolDice[12].toggleSide()
 // poolDice[15].toggleSide()
 
 
-// const action1 = new Action('Investigate', 15,'int', ['dex', 'wis'])
-// const action2 = new Action('Defend', 12,'con', ['dex', 'int'])
-// const action3 = new Action('Move', 10,'dex', ['wis'])
-// const action4 = new Action('Social Interaction', 17,'cha', ['int', 'str', 'wis'])
-// const action5 = new Action('Kill Everyone all at once', 23,'str', ['dex', 'con', 'int', 'wis', 'cha'])
-const action = new Action('Attack', 10,'none', ['dex', 'wis', 'str', 'con', 'int', 'cha'])
+const action1 = new Action('Investigate', 15,'int', ['dex', 'wis'])
+const action2 = new Action('Defend', 12,'con', ['dex', 'int'])
+const action3 = new Action('Move', 10,'dex', ['wis'])
+const action4 = new Action('Social Interaction', 17,'cha', ['int', 'str', 'wis'])
+const action5 = new Action('Attack', 23,'str', ['dex', 'int'])
+const action = new Action('Generic action', 10,'none', ['dex', 'wis', 'str', 'con', 'int', 'cha'])
 
 // const action6 = new Action('Investigate', 15,'int', ['dex', 'wis'])
 // const action7 = new Action('Defend', 12,'con', ['dex', 'int'])
 // const action8 = new Action('Move', 10,'dex', ['wis'])
 // const action9 = new Action('Social Interaction', 17,'cha', ['int', 'str', 'wis'])
 // const action10 = new Action('Kill Everyone all at once', 23,'str', ['dex', 'con', 'int', 'wis', 'cha'])
-const action11 = new Action('Attack', 15,'str', ['dex', 'wis'])
+// const action11 = new Action('Attack', 15,'str', ['dex', 'wis'])
 // const action6x = new Action('Investigate', 15,'int', ['dex', 'wis'])
 // const action7x = new Action('Defend', 12,'con', ['dex', 'int'])
 // const action8x = new Action('Move', 10,'dex', ['wis'])
@@ -388,50 +388,50 @@ const action11 = new Action('Attack', 15,'str', ['dex', 'wis'])
 // const action10x = new Action('Kill Everyone all at once', 23,'str', ['dex', 'con', 'int', 'wis', 'cha'])
 // const action11x= new Action('Attack', 15,'str', ['dex', 'wis'])
 
-let statistics = {}
-let dieResults = {}
-for (let i = 0; i < 100;i++) {
-    rollDiceInTray()
+// let statistics = {}
+// let dieResults = {}
+// for (let i = 0; i < 100;i++) {
+//     rollDiceInTray()
     
-    const currentResult = action.result
-    const currentValue = action.attemptValue
+//     const currentResult = action.result
+//     const currentValue = action.attemptValue
    
-    if (statistics[String(currentResult)] !== undefined) {
-        statistics[String(currentResult)]++
-    } else {
-        statistics[String(currentResult)] = 1
-    }
+//     if (statistics[String(currentResult)] !== undefined) {
+//         statistics[String(currentResult)]++
+//     } else {
+//         statistics[String(currentResult)] = 1
+//     }
 
-    if (dieResults[String(currentValue)] !== undefined) {
-        dieResults[String(currentValue)]++
-    } else {
-        dieResults[String(currentValue)] = 1
-    }
+//     if (dieResults[String(currentValue)] !== undefined) {
+//         dieResults[String(currentValue)]++
+//     } else {
+//         dieResults[String(currentValue)] = 1
+//     }
     
-}
-console.log(statistics)
-console.log(dieResults);
+// }
+// console.log(statistics)
+// console.log(dieResults);
 
-statistics = {}
-dieResults = {}
-for (let i = 0; i < 100;i++) {
-    rollDiceInTray()
+// statistics = {}
+// dieResults = {}
+// for (let i = 0; i < 100;i++) {
+//     rollDiceInTray()
     
-    const currentResult = action11.result
-    const currentValue = action11.attemptValue
+//     const currentResult = action11.result
+//     const currentValue = action11.attemptValue
    
-    if (statistics[String(currentResult)] !== undefined) {
-        statistics[String(currentResult)]++
-    } else {
-        statistics[String(currentResult)] = 1
-    }
+//     if (statistics[String(currentResult)] !== undefined) {
+//         statistics[String(currentResult)]++
+//     } else {
+//         statistics[String(currentResult)] = 1
+//     }
 
-    if (dieResults[String(currentValue)] !== undefined) {
-        dieResults[String(currentValue)]++
-    } else {
-        dieResults[String(currentValue)] = 1
-    }
+//     if (dieResults[String(currentValue)] !== undefined) {
+//         dieResults[String(currentValue)]++
+//     } else {
+//         dieResults[String(currentValue)] = 1
+//     }
     
-}
-console.log(statistics)
-console.log(dieResults);
+// }
+// console.log(statistics)
+// console.log(dieResults);
