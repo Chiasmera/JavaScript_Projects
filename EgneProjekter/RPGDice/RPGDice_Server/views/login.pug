@@ -1,0 +1,16 @@
+include includes/htmlHeader 
+//- link(rel="stylesheet", href="css/gmStyle.css")
+script(src="js/login.js" defer)
+body 
+    .loginContainer 
+        h1 Log In
+        .playerContainer
+            label Player Name
+                input(type='text', id='playerName', required)
+        .gmContainer
+            label Password (GM only)
+                input(type='password', id='gmPassword', autocomplete='current-password', min-length='8' required)
+        button(id='logInButton')= 'Log in'
+        
+
+        
