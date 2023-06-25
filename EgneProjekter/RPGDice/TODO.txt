@@ -10,9 +10,9 @@ DICE
 ROLLING DICE
 - Should be possible to select dice from pool, then roll them
     x able to move die from pool to tray
-    - Implement roll button
+    x Implement roll button
     - Dice rolled should be removed from pool or 'exhausted'
-    - Pool should reset after a roll, if pool is empty
+    
 
 DICE POOL
 x Should be possible to construct a pool of dice
@@ -20,8 +20,8 @@ x Should be possible to construct a pool of dice
     - Should contain a 'rest' button, that resets the dice pool
 
 SKILLS
-- Should show cards/a list of actions or skills
-    - Actions or skills should show grade of success or failure, depending on rolled result
+x Should show cards/a list of actions or skills
+    x Actions or skills should show grade of success or failure, depending on rolled result
     - Attacks and other opposed checks should be able to be reduced by enemy roll/defence
 
 MULTIPLAYER
