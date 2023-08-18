@@ -11,7 +11,7 @@ import he from 'he'
 import cors from 'cors'
 
 //express import
-import express from 'express'
+import express, { json } from 'express'
 const app = express();
 
 //fast-xml-parser import
@@ -28,21 +28,29 @@ app.set('view engine', 'pug')
 //Middleware
 app.use(express.static('Assets'))
 app.use(cors())
+app.use(express.json())
 
 //endpoints
 app.get('/', async (req, res) => {
+   
+    res.render('home', {  })
+})
+
+app.get('/collection/:name', async (req, res) => {
+    const username = req.params.name
 
     let games = [
         new Game(173346, 318316),
         new Game(1758, 31959),
         new Game(183231, 283480),
         new Game(270633, 441764),
-        new Game(31260, 189116)
+        new Game(31260, 189116),
+        new Game(161970, 245258),
+        new Game(80642, 60524)
     ]
 
-    games = await getTestObjects(games)
-    
-    res.render('home', {games: games})
+    games = await JSON.stringify(await getTestObjects(games))
+    res.send(games)
 })
 
 async function getTestObjects (gameObjectarray) {
@@ -126,33 +134,41 @@ async function getTestObjects (gameObjectarray) {
         }
 
         //Assign dimensions
-        // if (game.versionID !== undefined && Array.isArray(parsedResult.items.item.versions)) {
-            for (let item of parsedResult.items.item.versions.item) {        
-                   
+        let currentVersion = parsedResult.items.item.versions.item
+        if (Array.isArray(currentVersion)) {
+            for (let item of currentVersion) {        
+                
                 if (String(item.id) === String(game.versionID) ) {
-                    if (parseFloat(item.length.value) > 0){
-                        game.x = parseFloat(item.length.value)
-                    } else {
-                        game.x = 29.6
-                    }
-                    if (parseFloat(item.width.value) > 0){
-                        game.y =parseFloat(item.width.value)
-                    } else {
-                        game.y = 29.6
-                    }
-                    if (parseFloat(item.depth.value) > 0){
-                        game.z =parseFloat(item.depth.value)
-                    } else {
-                        game.z = 7.2
-                    }  
-                    if (item.weight.value){
-                        game.mass = item.weight.value
-                    } else {
-                        game.mass = 0
-                    } 
+                    currentVersion = item
                 }
             }
+        }
+        
+        if (parseFloat(currentVersion.width.value) > 0){
+            game.x = parseFloat(currentVersion.width.value)  * 2.54
+        } else {
+            game.x = 29.6
+        }
+        if (parseFloat(currentVersion.depth.value) > 0){
+            game.y =parseFloat(currentVersion.depth.value) * 2.54
+        } else {
+            game.y = 7.2
+        }
+        if (parseFloat(currentVersion.length.value) > 0){
+            game.z =parseFloat(currentVersion.length.value) * 2.54
+        } else {
+            game.z = 29.6
+        }  
+        if (currentVersion.weight.value){
+            game.mass = parseFloat(currentVersion.weight.value)
+        } else {
+            game.mass = parseFloat(0)
+        } 
+            
+        
 
+
+        
     }
     return games
 }
@@ -184,4 +200,4 @@ class Game {
     }
 }
 
-app.listen(port, console.log('server running'))
+app.listen(port, console.log(`server running on ${port}`))

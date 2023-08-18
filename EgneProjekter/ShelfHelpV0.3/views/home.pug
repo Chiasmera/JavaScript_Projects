@@ -4,6 +4,19 @@ html(lang="en")
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title ShelfHelp
+        link(rel="stylesheet", href="home.css")
+        script(src="onLoad.js" defer) 
     body
-        for game in games
-            p= `${game.title} : ${Math.ceil(game.x)}x${Math.ceil(game.y)}x${Math.ceil(game.z)}`
+        .optionsContainer
+            label(for='shelfX') Max Column
+            input(type="number", id='shelfX', value=5)
+            label(for='shelfy') Max Row
+            input(type="number", id='shelfY', value=5)
+            label(for='shelfWidth') Max Shelf Width
+            input(type="number", id='shelfWidth', value=33)
+            label(for='shelfHeight') Max Shelf Height
+            input(type="number", id='shelfHeight', value=33)
+        .leftoverContainer
+        .shelfContainer 
+
+

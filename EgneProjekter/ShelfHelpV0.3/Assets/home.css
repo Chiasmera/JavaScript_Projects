@@ -1,0 +1,43 @@
+body {
+    display: grid;
+    grid-template-areas:    "optionsContainer"
+                            "leftoverContainer"
+                            "shelfContainer";
+}
+
+.optionsContainer {
+    grid-area: optionsContainer;
+}
+
+.leftoverContainer {
+    grid-area: leftoverContainer;
+    min-height: 1rem;
+}
+
+.shelfContainer {
+    grid-area: shelfContainer;
+    display: grid;
+    border-style: outset;
+    border-width: 0.25rem;
+    padding: 0.25rem;
+    width: fit-content;
+    height: fit-content;
+}
+
+.shelf {
+    display: inline-block;
+    border-style: inset;
+    border-width: 0.25rem;
+    padding: 0px;
+    margin: 0px;
+}
+
+.game {
+    display: inline-block;
+    border-style: solid;
+    border-width: 1px;
+    font-size: small;
+    overflow: hidden;
+    padding: 0px;
+    margin: 0px;
+}
