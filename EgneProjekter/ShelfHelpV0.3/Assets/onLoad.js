@@ -133,11 +133,11 @@ async function onFillShelvesAction() {
     }
     
     //fetch updated list of games
-    const games = await fetchCollection(usernameField)
+    const games = await fetchCollection(usernameField.value)
 
 
     //fill out shelf array, sorted by second criteria
-    const filledShelves =distributeGamesToShelves(games, 'weight', 'officialTime')
+    const filledShelves = distributeGamesToShelves(games, 'weight', 'officialTime')
     
     //display the shelf array
     displayShelves(filledShelves)

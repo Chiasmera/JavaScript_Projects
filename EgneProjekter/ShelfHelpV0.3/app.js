@@ -39,37 +39,52 @@ app.get('/', async (req, res) => {
 app.get('/collection/:name', async (req, res) => {
     const username = req.params.name
 
-    let games = [
-        new Game(173346, 318316),
-        new Game(1758, 31959),
-        new Game(183231, 283480),
-        new Game(270633, 441764),
-        new Game(31260, 189116),
-        new Game(161970, 245258),
-        new Game(80642, 60524),
-
-        new Game(173346, 318316),
-        new Game(1758, 31959),
-        new Game(183231, 283480),
-        new Game(270633, 441764),
-        new Game(31260, 189116),
-        new Game(161970, 245258),
-        new Game(80642, 60524),
-
-        new Game(173346, 318316),
-        new Game(1758, 31959),
-        new Game(183231, 283480),
-        new Game(270633, 441764),
-        new Game(31260, 189116),
-        new Game(161970, 245258),
-        new Game(80642, 60524)
-    ]
+    const collectionXML = await fetchCollectionXMLFromBGG(username, false)
+    const games = parseXMLtoGameObjects(collectionXML)
+    console.log(games);
 
     games = await JSON.stringify(await fetchGamesFromBGG(games))
     res.send(games)
 })
 
+function parseXMLtoGameObjects (collectionXML) {
+    const games = []
+    let count = 0
+    for (let game of collectionXML.items.item) {       
+        const id = game.objectid
+        let versionID = 0
+        let x = 29.6
+        let y = 7.2
+        let z = 29.6
+        let mass = 0
+        let img = ''
+        let thumbnail = ''
+        if (game.version) {
+            versionID = game.version.item.id
+            x = game.version.item.width * 2.54
+            y = game.version.item.depth * 2.54
+            z = game.version.item.length * 2.54
+            mass = game.version.item.weight
+            img = game.version.item.image
+            thumbnail = game.version.item.thumbnail
+        }
+
+        games.push(new Game(id, versionID, x, y, z, mass))
+    }
+    return games
+
+}
+
+async function fetchCollectionXMLFromBGG(username, includeExpansion) {
+    const expansionString = includeExpansion ? '' : '&excludesubtype=boardgameexpansion'
+    const xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/collection?username=${username}${expansionString}&excludesubtype=boardgameexpansion&version=1`)
+    const parser = new XMLParser(parserOptions)
+    const parsedResult = await parser.parse(xml)
+    return parsedResult
+}
+
 async function fetchGamesFromBGG (gameObjectarray) {
+    console.log(gameObjectarray);
     const games = gameObjectarray 
     
     for (let game of games) {
@@ -77,8 +92,13 @@ async function fetchGamesFromBGG (gameObjectarray) {
         const parser = new XMLParser(parserOptions)
         const parsedResult = await parser.parse(xml)
 
-        game.img = String(parsedResult.items.item.image),
-        game.thumbnail = String(parsedResult.items.item.thumbnail),
+        if (!game.img) {
+            game.img = String(parsedResult.items.item.image)
+        }
+        if (!game.img) {
+           game.thumbnail = String(parsedResult.items.item.thumbnail)
+        }
+        
         game.minPlayers = parsedResult.items.item.minplayers.value,
         game.maxPlayers = parsedResult.items.item.maxplayers.value,
         game.minTime = parsedResult.items.item.minplaytime.value,
@@ -150,41 +170,36 @@ async function fetchGamesFromBGG (gameObjectarray) {
         }
 
         //Assign dimensions
-        let currentVersion = parsedResult.items.item.versions.item
-        if (Array.isArray(currentVersion)) {
-            for (let item of currentVersion) {        
+        // let currentVersion = parsedResult.items.item.versions.item
+        // if (Array.isArray(currentVersion)) {
+        //     for (let item of currentVersion) {        
                 
-                if (String(item.id) === String(game.versionID) ) {
-                    currentVersion = item
-                }
-            }
-        }
+        //         if (String(item.id) === String(game.versionID) ) {
+        //             currentVersion = item
+        //         }
+        //     }
+        // }
         
-        if (parseFloat(currentVersion.width.value) > 0){
-            game.x = parseFloat(currentVersion.width.value)  * 2.54
-        } else {
-            game.x = 29.6
-        }
-        if (parseFloat(currentVersion.depth.value) > 0){
-            game.y =parseFloat(currentVersion.depth.value) * 2.54
-        } else {
-            game.y = 7.2
-        }
-        if (parseFloat(currentVersion.length.value) > 0){
-            game.z =parseFloat(currentVersion.length.value) * 2.54
-        } else {
-            game.z = 29.6
-        }  
-        if (currentVersion.weight.value){
-            game.mass = parseFloat(currentVersion.weight.value)
-        } else {
-            game.mass = parseFloat(0)
-        } 
-            
-        
-
-
-        
+        // if (parseFloat(currentVersion.width.value) > 0){
+        //     game.x = parseFloat(currentVersion.width.value)  * 2.54
+        // } else {
+        //     game.x = 29.6
+        // }
+        // if (parseFloat(currentVersion.depth.value) > 0){
+        //     game.y =parseFloat(currentVersion.depth.value) * 2.54
+        // } else {
+        //     game.y = 7.2
+        // }
+        // if (parseFloat(currentVersion.length.value) > 0){
+        //     game.z =parseFloat(currentVersion.length.value) * 2.54
+        // } else {
+        //     game.z = 29.6
+        // }  
+        // if (currentVersion.weight.value){
+        //     game.mass = parseFloat(currentVersion.weight.value)
+        // } else {
+        //     game.mass = parseFloat(0)
+        // }             
     }
     return games
 }
@@ -210,9 +225,15 @@ async function fetchGamesFromBGG (gameObjectarray) {
 }
 
 class Game {
-    constructor(id, versionID) {
-        this.id = String(id),
+    constructor(id, versionID, x, y, z, mass, img, thumbnail) {
+        this.id = String(id)
         this.versionID = String(versionID)
+        this.x = x
+        this.y = y
+        this.z = z
+        this.mass = mass
+        this.img = img
+        this.thumbnail = thumbnail
     }
 }
 
