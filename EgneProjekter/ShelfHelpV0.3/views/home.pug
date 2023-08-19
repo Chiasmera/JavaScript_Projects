@@ -8,15 +8,18 @@ html(lang="en")
         script(src="onLoad.js" defer) 
     body
         .optionsContainer
-            label(for='shelfX') Max Column
-            input(type="number", id='shelfX', value=5)
-            label(for='shelfy') Max Row
-            input(type="number", id='shelfY', value=5)
+            label(for='user') Username
+            input(type="text", id='user', value='LuciusWriter', class='text input')
+            label(for='shelfX') Columns
+            input(type="number", id='shelfX', value=3, class='number input')
+            label(for='shelfy') Max Rows
+            input(type="number", id='shelfY', value=3, class='number input')
             label(for='shelfWidth') Max Shelf Width
-            input(type="number", id='shelfWidth', value=33)
+            input(type="number", id='shelfWidth', value=33, class='number input')
             label(for='shelfHeight') Max Shelf Height
-            input(type="number", id='shelfHeight', value=33)
+            input(type="number", id='shelfHeight', value=33, class='number input')
+            button(id="fillShelvesButton") Fill Shelves
         .leftoverContainer
-        .shelfContainer 
+        table.shelfContainer
 
 

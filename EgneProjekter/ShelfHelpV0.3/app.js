@@ -1,5 +1,5 @@
 const host = 'localhost'
-const port = 8080
+const port = 80
 
 //node-fetch import
 import fetch from 'node-fetch'
