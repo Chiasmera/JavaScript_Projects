@@ -1,23 +1,16 @@
 const host = 'localhost'
 const port = 80
+const username = 'LuciusWriter'
 
 //IMPORTS  -------------------------------------------------------------------------------------------
-import { synchronizeCollection } from './FireBase_Controller.js';
-
 //Firebase import
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, getDocs, setDoc, getDoc, doc, deleteDoc, addDoc } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, setDoc, getDoc, doc, deleteDoc, addDoc, Timestamp } from 'firebase/firestore'
 import { firebaseConfig } from './FB_Config.js'
-import { addGameToDB, getGamesFromDB, deleteGameFromDB, getIDsFromDB } from './FireBase_Controller.js';
+import { synchronizeCollection, setLastSyncDate, getLastSyncDate } from './FireBase_Controller.js';
 
 const firebase_app = initializeApp(firebaseConfig)
 const db = getFirestore(firebase_app)
-
-//node-fetch import
-import fetch from 'node-fetch'
-
-//HTML parser?
-import he from 'he'
 
 //cors import
 import cors from 'cors'
@@ -26,13 +19,6 @@ import cors from 'cors'
 import express, { json } from 'express'
 const app = express();
 
-//fast-xml-parser import
-const parserOptions = {
-    ignoreAttributes: false,
-    parseAttributeValue: true,
-    attributeNamePrefix: "",
-}
-import { XMLParser } from 'fast-xml-parser'
 
 //Set view engine
 app.set('view engine', 'pug')
@@ -82,5 +68,15 @@ class Game {
 }
 
 
-await synchronizeWithDB()
+const now = Timestamp.fromDate(new Date()).toMillis()
+let lastSync =await getLastSyncDate()
+lastSync = lastSync.toMillis()
+
+
+if ( (now - lastSync) / 1000 / 60 / 24 > 1) {
+    await synchronizeWithDB(username, true)
+} else {
+    console.log(`Days since last sync : ${(now - lastSync) / 1000 / 60 / 24}`);
+}
+
 app.listen(port, console.log(`server running on ${port}`))

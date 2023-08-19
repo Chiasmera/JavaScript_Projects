@@ -1,17 +1,19 @@
 //Firebase import
 import { initializeApp } from 'firebase/app'
-import { getFirestore, getDocs, setDoc, doc, deleteDoc, collection} from 'firebase/firestore'
+import { getFirestore, getDoc, getDocs, setDoc, doc, deleteDoc, collection, Timestamp} from 'firebase/firestore'
 import { firebaseConfig } from './FB_Config.js'
-import { getCollection, getGame } from './BGG_Controller.js'
+import { getCollection} from './BGG_Controller.js'
 
 const firebase_app = initializeApp(firebaseConfig)
 const db = getFirestore(firebase_app)
 
 const dbGameCollection = collection(db, 'GameCollection')
-const username = 'LuciusWriter'
+const metadataDB = collection(db, 'metaData')
+
+// OLD__________________________ 
 
 /**
- * Gets all IDs from all games in the collection
+ * Gets all IDs from all games in the database
  * @returns array of IDs
  */
 async function getIDsFromDB () {
@@ -20,13 +22,12 @@ async function getIDsFromDB () {
         return String(gameDoc.id)
     })
     gamesIDs = [...new Set(gamesIDs)]
-
     return gamesIDs
 }
 
 /**
  * adds a game object to the database. If an entry with same id already exists, instead updates the entry.
- * @param {Object} gameObject 
+ * @param {Game} gameObject a Game object
  */
 async function addGameToDB (gameObject) {
     const id = gameObject.id
@@ -56,6 +57,16 @@ async function getGamesFromDB() {
 }
 
 /**
+ * Gets a set of IDs based on the Games in the collection
+ * @param {Array[Game]} collection 
+ * @returns 
+ */
+function getSetOfIDsFromCollection(collection) {
+    let collectionIDs = collection.map( (object) => object.id )
+    return [...new Set(collectionIDs)]
+}
+
+/**
  * syncs the database with the collection of the given user on BGG. Will add any new games to DB, and 
  * remove games no longer present in collection. If fullSync is true, will also compare each game for 
  * changes and update fields where needed
@@ -69,8 +80,7 @@ async function synchronizeCollection (username, fullSync) {
 
     //Get IDs for games in collection
     let collection = await getCollection(username)
-    let collectionIDs = collection.map( (object) => object.id )
-    collectionIDs = [...new Set(collectionIDs)]
+    let collectionIDs = getSetOfIDsFromCollection(collection)
 
     //Get IDS from DB
     const DBIDs = await getIDsFromDB()
@@ -86,46 +96,25 @@ async function synchronizeCollection (username, fullSync) {
             if (collectionIDs[0] === DBIDs[0]) {
                 //if fullSync is true, merge the new game into db anyway
                 if (fullSync) {
-                    try {
-                        await new Promise(r => setTimeout(r, 1000));
-                        const currentGame = await getGame(collectionIDs[0])
-                        let object = collection.find( (object) => object.id === collectionIDs[0] )
-                        currentGame.boxSize = object.boxSize
+                        // await new Promise(r => setTimeout(r, 1000));
+                        // const currentGame = await getGame(collectionIDs[0])
+                        // let object = collection.find( (object) => object.id === collectionIDs[0] )
+                        // currentGame.boxSize = object.boxSize
+
+                        let currentGame = collection.find( (object) => object.id === collectionIDs[0] )
                         await addGameToDB(currentGame)
                         added++
-                    } catch (error) {
-                        if (error.status === 429) {
-                            console.log(error);
-                            await new Promise(r => setTimeout(r, 1500));
-                        }else if (error.status === 429) {
-                            console.log(error);
-                        } else {
-                            console.log(error);
-                        }                        
-                    }
                 }
                 collectionIDs.shift()
                 DBIDs.shift()
+
             //If the collection id is lesser, game does not exists in DB and should be added
             } else if (collectionIDs[0] < DBIDs[0]) {
-                try {
-                    const currentGame = await getGame(collectionIDs[0])
-                    let object = collection.find( (object) => object.id === collectionIDs[0] )
-                    currentGame.boxSize = object.boxSize
+                    let currentGame = collection.find( (object) => object.id === collectionIDs[0] )
                     await addGameToDB(currentGame)
                     collectionIDs.shift()
                     added++
-                } catch (error) {
-                    if (error.status === 429) {
-                        console.log(error);
-                        await new Promise(r => setTimeout(r, 1500));
-                    }else if (error.status === 202) {
-                        console.log(error);
-                    } else {
-                        console.log(error);
-                    }                    
-                }
-                
+
             //otherwise, the db id is lesser, and game does not exist in collection. It should be removed
             } else {
                 await deleteGameFromDB(DBIDs[0])
@@ -134,26 +123,12 @@ async function synchronizeCollection (username, fullSync) {
             }
         }
 
-
         //if there is still elements in collectionIDs, add those to the db
         while (collectionIDs.length > 0) {
-           try {
-                const currentGame = await getGame(collectionIDs[0])
-                let object = collection.find( (object) => object.id === collectionIDs[0] )
-                currentGame.boxSize = object.boxSize
+            let currentGame = collection.find( (object) => object.id === collectionIDs[0] )
                 await addGameToDB(currentGame)
                 collectionIDs.shift()
                 added++
-            } catch (error) {
-                if (error.status === 429) {
-                    console.log(error);
-                    await new Promise(r => setTimeout(r, 1500));
-                }else if (error.status === 429) {
-                    console.log(error);
-                } else {
-                    console.log(error);
-                }                    
-            }
         }
 
         //If there is still elements in DBIDs, remove those from DB
@@ -162,9 +137,40 @@ async function synchronizeCollection (username, fullSync) {
             DBIDs.shift()
             removed++
         }
+    } else {
+        throw new Error('Either database list of IDs or collection list of IDs is not an array')
     }
 
+    setLastSyncDate(new Date())
+
     return {addedGames: added, removedGames: removed}
+
+
 }
 
-export {getIDsFromDB, addGameToDB, deleteGameFromDB, getGamesFromDB, synchronizeCollection}
+/**
+ * Return Timestamp of the last sync
+ * @returns  Timestamp
+ */
+async function getLastSyncDate() {
+    const updateRef = doc(db, "metaData", "update");
+    const docSnap = await getDoc(updateRef);
+    let update    
+    if (docSnap.exists()) {
+        update = await docSnap.data()
+        return update.timestamp
+    } else {
+      throw new Error('cannot locate the update document in Firestore')
+    }
+}
+
+/**
+ * Sets the last sync date in the DB
+ * @param {Date} Date a date
+ */
+async function setLastSyncDate (Date) {
+    const timestamp = Timestamp.fromDate(Date) 
+    await setDoc(doc(db, "metaData", "update"), {timestamp}, {merge: false});
+}
+
+export {synchronizeCollection, getLastSyncDate, setLastSyncDate}
