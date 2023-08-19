@@ -10,6 +10,8 @@ fillShelvesButton.addEventListener('pointerdown', ()=> {
     onFillShelvesAction()
 })
 
+const SHRINKFACTOR = 4
+
 class Shelf {
     constructor() {
         this.remHeight = parseFloat(shelfHeightField.value)
@@ -138,16 +140,7 @@ async function onFillShelvesAction() {
     const filledShelves =distributeGamesToShelves(games, 'weight', 'officialTime')
     
     //display the shelf array
-
     displayShelves(filledShelves)
-    // for (let column of filledShelves) {
-    //     for (let shelf of column) {
-    //         displayShelf(shelf)
-    //     }
-    // }
-
-
-
 }
 
 function distributeGamesToShelves(games, sortByA, sortByB) {
@@ -172,6 +165,7 @@ function distributeGamesToShelves(games, sortByA, sortByB) {
         }
     }
 
+    //creates an array of shelves
     const shelves = []
     for (let col = 0; col<maxColumnsField.value; col++) {
         const column = []
@@ -194,103 +188,49 @@ function distributeGamesToShelves(games, sortByA, sortByB) {
 
             //divide into rows
             const rowArray = divideIntoRows(maxRowsField.value, sortedGames)
-
             
             //for each row
-            // for (let rowIndex = rowArray.length-1; rowIndex >= 0; rowIndex-- ) {
-            for (rowIndex in rowArray) {
+            for (let rowI in rowArray) {
+                const rowIndex = parseInt(rowI)
                 //sort the current row
                 const currentRow = sortBy(rowArray[rowIndex], sortByB, false)
-
-                //variable to hold current shelf columns index in row
-                let shelfColumnIndex = shelves.length-1
 
                 //for each game in list, starting with the lowest
                 for (let gameIndex = currentRow.length-1; gameIndex >= 0; gameIndex--) {
 
-                    //place on the right-most shelf
-                    if (!shelves[shelfColumnIndex][rowIndex].place(currentRow[gameIndex])) {
-                        //game was not placed on the shelf, try shelf on the left
-                        if (shelfColumnIndex > 0) {
-                            //shelf exists to the left, try to place it here
-                            if(!shelves[shelfColumnIndex-1][rowIndex].place(currentRow[gameIndex])){
-                                //game could not be placed, put game into above row, if it exists
-                                if (rowIndex > 0) {
-                                    rowArray[rowIndex-1].push(currentRow[gameIndex])
-                                } else {
-                                    //place a game in leftovers
-                                    createGameElement(leftoverContainer, currentRow[gameIndex])
-                                    console.log('A game did not fit in column, and was placed on leftovers');
-                                }
-                                //shift the starting shelf to the left, if it exists
-                                if (shelfColumnIndex>0) { shelfColumnIndex--}
-                            }
+                    //variable to hold current shelf columns index in row
+                    let shelfColumnIndex = parseInt(0)
 
-                        } else {
-                            //no more shelves on the left, put game into above row, if it exists
-                            if (rowIndex > 0) {
-                                rowArray[rowIndex-1].push(currentRow[gameIndex])
-                            } else {
-                                //place a game in leftovers
-                                createGameElement(leftoverContainer, currentRow[gameIndex])
-                                console.log('A game did not fit in column, and was placed on leftovers');
+                    //starting from the left, keep placing in row until there is no more space in row
+                    let placed = false
+                    while (!placed) {
+                        //place in current column and row
+                        placed = shelves[shelfColumnIndex][rowIndex].place(currentRow[gameIndex])
+                        if (!placed){
+                                shelfColumnIndex++
+                            if (!shelves[shelfColumnIndex]) {
+                                //place on row down
+                                if ( rowArray[rowIndex+1]) {
+                                    
+                                    rowArray[rowIndex+1].push(currentRow[gameIndex])
+                                    placed = true
+                                } else {
+                                     //place a game in leftovers
+                                    createGameElement(leftoverContainer, currentRow[gameIndex])
+                                    placed = true
+                                }                                
                             }
                         }
                     }
                 }
             }
 
-            //remove any rows and columns containing ONLY empty shelves empty shelves
+            //remove any rows and columns containing ONLY empty shelves empty shelves?
             //TODO
 
             return shelves
     }
-
-
-    
-
-    // // old solution below
-    // const arrayOfColumns = distributeGamesInColumns(parseInt(maxColumnsField.value), games,sortByB )
-
-    // //for every column of games
-    // for (let columnIndex in arrayOfColumns) {
-    //     //sort, then run through games in the array
-    //     arrayOfColumns[columnIndex].sort( (a,b) => {a[sortByA] > b[sortByA] ? 1 : -1})
-    //     let shelfIndex = 0
-    //     for (let game of arrayOfColumns[columnIndex]) {
-    //         let placed = false
-    //         while (shelfIndex < shelves[columnIndex].length && !placed){
-    //             if (shelves[columnIndex][shelfIndex].place(game)){
-    //                 placed = true
-    //             } else {
-    //                 shelfIndex++
-    //             }
-    //         } 
-    //         if (!placed){
-    //             createGameElement(leftoverContainer, game)
-    //             console.log('A game did not fit in column, and was placed on leftovers');
-    //         }
-    //     }
-        
-    // }
-    // return shelves
 }
-
-//outdated
-// function distributeGamesInColumns(columns, games, sortBy) {
-//     const sortedGames = games.sort( (a, b) => { a[sortBy] > b[sortBy] ? 1 : -1})
-
-
-//     const columnArray = []
-//     for (let i = 0; i < columns; i++) {
-//         columnArray[i] = []
-//     }
-//     for (let gameIndex in sortedGames ) {
-//         columnArray[gameIndex % columns].push(sortedGames[gameIndex])
-//     }
-
-//     return columnArray
-// }
 
 function divideIntoRows(rows, sortedList) {
     const rowArray = []
@@ -330,14 +270,13 @@ function displayShelves(shelfArray) {
         const currentTableRow = document.createElement('tr')
         for ( let col in shelfArray) {
             const currentTCell = document.createElement('td')
-            currentTCell.style.width = String( `${shelfWidthField.value / 2}rem`)
-            currentTCell.style.height = String( `${shelfHeightField.value / 2}rem`)
+            currentTCell.style.width = String( `${shelfWidthField.value / SHRINKFACTOR}rem`)
+            currentTCell.style.height = String( `${shelfHeightField.value / SHRINKFACTOR}rem`)
+
             for (let game of shelfArray[col][row].getGames()) {
                 createGameElement(currentTCell, game)
             }
-            if (currentTCell.hasChildNodes()) {
-                currentTableRow.appendChild(currentTCell)
-            }
+            currentTableRow.prepend(currentTCell)
             col++
         }
         if (currentTableRow.hasChildNodes()) {
@@ -351,8 +290,8 @@ function createGameElement(parent, game) {
     const gameElement = document.createElement('div')
     gameElement.setAttribute('class', 'game')
 
-    gameElement.style.width = String( `${Math.round(game.x) / 2}rem`)
-    gameElement.style.height = String( `${Math.round(game.y) / 2}rem`)
+    gameElement.style.width = String( `${Math.round(game.x) / SHRINKFACTOR}rem`)
+    gameElement.style.height = String( `${Math.round(game.y) / SHRINKFACTOR}rem`)
     gameElement.textContent = String( `${game.title} (W:${game.weight}, T:${game.officialTime})`)
 
 

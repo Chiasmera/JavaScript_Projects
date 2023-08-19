@@ -46,14 +46,30 @@ app.get('/collection/:name', async (req, res) => {
         new Game(270633, 441764),
         new Game(31260, 189116),
         new Game(161970, 245258),
+        new Game(80642, 60524),
+
+        new Game(173346, 318316),
+        new Game(1758, 31959),
+        new Game(183231, 283480),
+        new Game(270633, 441764),
+        new Game(31260, 189116),
+        new Game(161970, 245258),
+        new Game(80642, 60524),
+
+        new Game(173346, 318316),
+        new Game(1758, 31959),
+        new Game(183231, 283480),
+        new Game(270633, 441764),
+        new Game(31260, 189116),
+        new Game(161970, 245258),
         new Game(80642, 60524)
     ]
 
-    games = await JSON.stringify(await getTestObjects(games))
+    games = await JSON.stringify(await fetchGamesFromBGG(games))
     res.send(games)
 })
 
-async function getTestObjects (gameObjectarray) {
+async function fetchGamesFromBGG (gameObjectarray) {
     const games = gameObjectarray 
     
     for (let game of games) {
