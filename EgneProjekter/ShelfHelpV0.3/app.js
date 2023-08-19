@@ -1,6 +1,18 @@
 const host = 'localhost'
 const port = 80
 
+//IMPORTS  -------------------------------------------------------------------------------------------
+import { synchronizeCollection } from './FireBase_Controller.js';
+
+//Firebase import
+import { initializeApp } from 'firebase/app'
+import { getFirestore, collection, getDocs, setDoc, getDoc, doc, deleteDoc, addDoc } from 'firebase/firestore'
+import { firebaseConfig } from './FB_Config.js'
+import { addGameToDB, getGamesFromDB, deleteGameFromDB, getIDsFromDB } from './FireBase_Controller.js';
+
+const firebase_app = initializeApp(firebaseConfig)
+const db = getFirestore(firebase_app)
+
 //node-fetch import
 import fetch from 'node-fetch'
 
@@ -39,6 +51,7 @@ app.get('/', async (req, res) => {
 app.get('/collection/:name', async (req, res) => {
     const username = req.params.name
 
+    //TODO - check if collection already exists in databas before fetching
     const collectionXML = await fetchCollectionXMLFromBGG(username, false)
     const games = parseXMLtoGameObjects(collectionXML)
     console.log(games);
@@ -47,9 +60,17 @@ app.get('/collection/:name', async (req, res) => {
     res.send(games)
 })
 
+//other functions
+async function synchronizeWithDB () {
+    console.log('Synchronizing with BGG');
+    const syncStats = await synchronizeCollection('LuciusWriter', false)
+    console.log(`Database synchronized. ${syncStats.addedGames} added or updated, ${syncStats.removedGames} removed.`);
+}
+
+
+
 function parseXMLtoGameObjects (collectionXML) {
     const games = []
-    let count = 0
     for (let game of collectionXML.items.item) {       
         const id = game.objectid
         let versionID = 0
@@ -167,39 +188,7 @@ async function fetchGamesFromBGG (gameObjectarray) {
             }
         } else {
             game.rank = parsedResult.items.item.statistics.ratings.ranks.rank.value
-        }
-
-        //Assign dimensions
-        // let currentVersion = parsedResult.items.item.versions.item
-        // if (Array.isArray(currentVersion)) {
-        //     for (let item of currentVersion) {        
-                
-        //         if (String(item.id) === String(game.versionID) ) {
-        //             currentVersion = item
-        //         }
-        //     }
-        // }
-        
-        // if (parseFloat(currentVersion.width.value) > 0){
-        //     game.x = parseFloat(currentVersion.width.value)  * 2.54
-        // } else {
-        //     game.x = 29.6
-        // }
-        // if (parseFloat(currentVersion.depth.value) > 0){
-        //     game.y =parseFloat(currentVersion.depth.value) * 2.54
-        // } else {
-        //     game.y = 7.2
-        // }
-        // if (parseFloat(currentVersion.length.value) > 0){
-        //     game.z =parseFloat(currentVersion.length.value) * 2.54
-        // } else {
-        //     game.z = 29.6
-        // }  
-        // if (currentVersion.weight.value){
-        //     game.mass = parseFloat(currentVersion.weight.value)
-        // } else {
-        //     game.mass = parseFloat(0)
-        // }             
+        }           
     }
     return games
 }
@@ -237,4 +226,6 @@ class Game {
     }
 }
 
+
+await synchronizeWithDB()
 app.listen(port, console.log(`server running on ${port}`))
