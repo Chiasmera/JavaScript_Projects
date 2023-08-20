@@ -47,9 +47,9 @@ app.get('/collection/:name', async (req, res) => {
 })
 
 //other functions
-async function synchronizeWithDB () {
+async function synchronizeWithDB (username) {
     console.log('Synchronizing with BGG');
-    const syncStats = await synchronizeCollection('LuciusWriter', false)
+    const syncStats = await synchronizeCollection(username, false)
     console.log(`Database synchronized. ${syncStats.addedGames} added or updated, ${syncStats.removedGames} removed.`);
 }
 
@@ -73,10 +73,11 @@ let lastSync =await getLastSyncDate()
 lastSync = lastSync.toMillis()
 
 
-if ( (now - lastSync) / 1000 / 60 / 24 > 1) {
-    await synchronizeWithDB(username, true)
+if ( (now - lastSync) / 1000 / 60 / 60  > 0) {
+    await synchronizeWithDB(username, false)
 } else {
-    console.log(`Days since last sync : ${(now - lastSync) / 1000 / 60 / 24}`);
+    console.log(`Did not sync database.`);
+    console.log(`Hours since last sync : ${(now - lastSync) / 1000 / 60 / 60}`);
 }
 
 app.listen(port, console.log(`server running on ${port}`))

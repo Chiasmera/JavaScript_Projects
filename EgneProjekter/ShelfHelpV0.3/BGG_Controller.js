@@ -58,6 +58,8 @@ async function fetchXML (url) {
  * @returns a js object parsed firectly from the xml
  */
 async function fetchCollectionXMLFromBGG(username, includeExpansion) {
+    console.log(`Fetching collection for: ${username}`);
+
     const expansionString = includeExpansion ? '' : '&excludesubtype=boardgameexpansion'
     const xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/collection?username=${username}${expansionString}&excludesubtype=boardgameexpansion&version=1`)
     return await parseXML(xml)
@@ -69,6 +71,8 @@ async function fetchCollectionXMLFromBGG(username, includeExpansion) {
  * @returns an Array of simple Game objects
  */
 function parseCollectiontoGameObjects (collectionXML) {
+    console.log(`Creating objects from collection`);
+
     const games = []
     for (let game of collectionXML.items.item) {       
         const id = game.objectid
@@ -84,7 +88,7 @@ function parseCollectiontoGameObjects (collectionXML) {
             x = game.version.item.width * 2.54
             y = game.version.item.depth * 2.54
             z = game.version.item.length * 2.54
-            mass = game.version.item.weight
+            mass = game.version.item.weight.value
             img = game.version.item.image
             thumbnail = game.version.item.thumbnail
         }
@@ -98,101 +102,98 @@ function parseCollectiontoGameObjects (collectionXML) {
  * @param {Game} game a Game object
  */
 async function fetchGameDetails (game) {
-    const xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/thing?id=${game.id}&stats=1&versions=1`)
-    const parsedResult = await parseXML(xml)
+    await new Promise(r => setTimeout(r, 800));
     
-    if (!game.img) {
-        game.img = String(parsedResult.items.item.image)
-    }
-    if (!game.img) {
-       game.thumbnail = String(parsedResult.items.item.thumbnail)
+    try {
+        const xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/thing?id=${game.id}&stats=1&versions=1`)
+        const parsedResult = await parseXML(xml)
+    
+        if (!game.img) {
+            game.img = String(parsedResult.items.item.image)
+        }
+        if (!game.img) {
+        game.thumbnail = String(parsedResult.items.item.thumbnail)
+        }
+        
+        game.minPlayers = parsedResult.items.item.minplayers.value,
+        game.maxPlayers = parsedResult.items.item.maxplayers.value,
+        game.minTime = parsedResult.items.item.minplaytime.value,
+        game.maxTime = parsedResult.items.item.maxplaytime.value,
+        game.officialTime = parsedResult.items.item.playingtime.value,
+        game.description = String(he.decode(parsedResult.items.item.description)),
+        game.publishYear = parsedResult.items.item.yearpublished.value,
+        game.minAge = parsedResult.items.item.minage.value,
+        game.mechanics = [],
+        game.averageRating = parsedResult.items.item.statistics.ratings.average.value,
+        game.rank = 0,
+        game.weight =  parsedResult.items.item.statistics.ratings.averageweight.value
+
+        //Assign title
+        if (Array.isArray(parsedResult.items.item.name)) {
+            game.title = he.decode(parsedResult.items.item.name[0].value)
+        } else if (typeof parsedResult.items.item.name === 'object') {
+            game.title = he.decode(parsedResult.items.item.name.value)
+        } else {
+            game.title = he.decode(parsedResult.items.item.name)
+        }
+
+        //calculate best number of player
+        let pollBestPlayers = {number: -1, weight: 0}
+        if (Array.isArray(parsedResult.items.item.poll[0].results)) {
+            for (let results of parsedResult.items.item.poll[0].results) {
+                let weight = ((results.result[0].numvotes*1.5) + results.result[1].numvotes - results.result[2].numvotes)
+                if (weight > pollBestPlayers.weight) {
+                    pollBestPlayers.number = results.numplayers
+                    pollBestPlayers.weight = weight
+                }
+            }
+            game.bestPlayers = pollBestPlayers.number
+        } else {
+            game.bestPlayers = -1
+        }
+
+
+        //calculate language dependency
+        let pollLanguageDep = {desc: '', weight: 0}
+        if (parsedResult.items.item.poll[2].results && Array.isArray(parsedResult.items.item.poll[2].results.result)) {
+            for (let results of parsedResult.items.item.poll[2].results.result) {
+                if (results.numvotes > pollLanguageDep.weight) {
+                    pollLanguageDep.desc = he.decode(results.value)
+                    pollLanguageDep.weight = results.numvotes
+                }
+            }
+            game.languageDependence = pollLanguageDep.desc
+        } else {
+            game.languageDependence = ''
+        }
+
+        //create array of mechanics
+        for (let link of parsedResult.items.item.link) {
+            if (link.type === "boardgamemechanic")
+            game.mechanics.push(he.decode(link.value))
+        }
+
+        //Assign rank
+        if (Array.isArray(parsedResult.items.item.statistics.ratings.ranks.rank)) {
+            for (let entry of parsedResult.items.item.statistics.ratings.ranks.rank) {
+                if (entry.friendlyname === "Board Game Rank") {
+                    game.rank = entry.value
+                }
+            }
+        } else {
+            game.rank = parsedResult.items.item.statistics.ratings.ranks.rank.value
+        }       
+
+    } catch (error) {
+
+        if (error.status === 429 || error.status === 202) {
+            await fetchGameDetails(game)
+        }
+
     }
     
-    game.minPlayers = parsedResult.items.item.minplayers.value,
-    game.maxPlayers = parsedResult.items.item.maxplayers.value,
-    game.minTime = parsedResult.items.item.minplaytime.value,
-    game.maxTime = parsedResult.items.item.maxplaytime.value,
-    game.officialTime = parsedResult.items.item.playingtime.value,
-    game.description = String(he.decode(parsedResult.items.item.description)),
-    game.publishYear = parsedResult.items.item.yearpublished.value,
-    game.minAge = parsedResult.items.item.minage.value,
-    game.mechanics = [],
-    game.averageRating = parsedResult.items.item.statistics.ratings.average.value,
-    game.rank = 0,
-    game.weight =  parsedResult.items.item.statistics.ratings.averageweight.value
-
-    //Assign title
-    if (Array.isArray(parsedResult.items.item.name)) {
-        game.title = he.decode(parsedResult.items.item.name[0].value)
-    } else if (typeof parsedResult.items.item.name === 'object') {
-        game.title = he.decode(parsedResult.items.item.name.value)
-    } else {
-        game.title = he.decode(parsedResult.items.item.name)
-    }
-
-    //calculate best number of player
-    let pollBestPlayers = {number: -1, weight: 0}
-    if (Array.isArray(parsedResult.items.item.poll[0].results)) {
-        for (let results of parsedResult.items.item.poll[0].results) {
-            let weight = ((results.result[0].numvotes*1.5) + results.result[1].numvotes - results.result[2].numvotes)
-            if (weight > pollBestPlayers.weight) {
-                pollBestPlayers.number = results.numplayers
-                pollBestPlayers.weight = weight
-            }
-        }
-        game.bestPlayers = pollBestPlayers.number
-    } else {
-        game.bestPlayers = -1
-    }
-
-
-    //calculate language dependency
-    let pollLanguageDep = {desc: '', weight: 0}
-    if (parsedResult.items.item.poll[2].results && Array.isArray(parsedResult.items.item.poll[2].results.result)) {
-        for (let results of parsedResult.items.item.poll[2].results.result) {
-            if (results.numvotes > pollLanguageDep.weight) {
-                pollLanguageDep.desc = he.decode(results.value)
-                pollLanguageDep.weight = results.numvotes
-            }
-        }
-        game.languageDependence = pollLanguageDep.desc
-    } else {
-        game.languageDependence = ''
-        console.log(parsedResult.items.item.poll[2].results);
-    }
-
-    //create array of mechanics
-    for (let link of parsedResult.items.item.link) {
-        if (link.type === "boardgamemechanic")
-        game.mechanics.push(he.decode(link.value))
-    }
-
-    //Assign rank
-    if (Array.isArray(parsedResult.items.item.statistics.ratings.ranks.rank)) {
-        for (let entry of parsedResult.items.item.statistics.ratings.ranks.rank) {
-            if (entry.friendlyname === "Board Game Rank") {
-                game.rank = entry.value
-            }
-        }
-    } else {
-        game.rank = parsedResult.items.item.statistics.ratings.ranks.rank.value
-    }           
-}
-
-/**
- * Loops through Game array and fetches additional data for each game. Has a delay between requests to respect rate limit
- * @param {Array[Game]} gameArray an Array of Game objects
- * @returns mutated version of the provided Game array, with additional data for ever game
- */
-async function filloutGameList (gameArray) {
-    console.log(gameArray);
-    const games = gameArray 
     
-    for (let game of games) {
-        await new Promise(r => setTimeout(r, 500));
-        fetchGameDetails(game)
-    }
-    return games
+    
 }
 
 /**
@@ -206,12 +207,13 @@ async function parseXML(xml) {
     return resultObject
 }
 
-async function getCollection(username, includeExpansions) {
-    const XML = fetchCollectionXMLFromBGG(username, includeExpansions)
-    const collection = parseCollectiontoGameObjects(XML)
-    const detailedCollection = filloutGameList(collection)
-    return detailedCollection
+async function getBaseCollection(username, includeExpansions) {
+    const XML = await fetchCollectionXMLFromBGG(username, includeExpansions)
+    const collection = await parseCollectiontoGameObjects(XML)
+    return collection
 }
 
 
-export {getCollection}
+
+
+export {getBaseCollection, fetchGameDetails}

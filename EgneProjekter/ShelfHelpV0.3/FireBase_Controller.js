@@ -2,15 +2,77 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, getDoc, getDocs, setDoc, doc, deleteDoc, collection, Timestamp} from 'firebase/firestore'
 import { firebaseConfig } from './FB_Config.js'
-import { getCollection} from './BGG_Controller.js'
+import { fetchGameDetails, getBaseCollection} from './BGG_Controller.js'
 
 const firebase_app = initializeApp(firebaseConfig)
 const db = getFirestore(firebase_app)
 
 const dbGameCollection = collection(db, 'GameCollection')
-const metadataDB = collection(db, 'metaData')
 
-// OLD__________________________ 
+class Game {
+    constructor(id, versionID, x, y, z, mass, img, thumbnail) {
+        this.id = String(id)
+        this.versionID = String(versionID)
+        this.x = parseFloat(x)
+        this.y = parseFloat(y)
+        this.z = parseFloat(z)
+        this.mass = parseFloat(mass)
+        this.img = String(img)
+        this.thumbnail = String(thumbnail)
+    }
+}
+
+// Firestore data converter
+const gameConverter = {
+    toFirestore: (game) => {
+        return {
+            id : String(game.id),
+            versionID : String(game.versionID),
+            title : String(game.title),
+            x : game.x,
+            y : game.y,
+            z : game.z,
+            mass : game.mass,
+            img : String(game.img),
+            thumbnail : String(game.thumbnail),
+            minPlayers : parseInt(game.minPlayers),
+            maxPlayers : parseInt(game.maxPlayers),
+            minTime : parseInt(game.minTime),
+            maxTime : parseInt(game.maxTime),
+            officialTime : parseInt(game.officialTime),
+            description : String(game.description),
+            publishYear : parseInt(game.publishYear),
+            minAge : parseInt(game.minAge),
+            mechanics : game.mechanics,
+            averageRating : parseFloat(game.averageRating),
+            rank : parseFloat(game.rank),
+            weight : parseFloat(game.weight),
+            bestPlayers : parseInt(game.bestPlayers),
+            languageDependence : String(game.languageDependence)
+            };
+    },
+    fromFirestore: (snapshot, options) => {
+        const data = snapshot.data(options);
+        const game = new Game(data.id, data.versionID,data.x, data.y,data.z,data.mass,data.img,data.thumbnail)
+        game.minPlayers = data.minPlayers,
+        game.maxPlayers = data.maxPlayers,
+        game.minTime = data.minTime,
+        game.maxTime = data.maxTime,
+        game.officialTime = data.officialTime,
+        game.description = data.description,
+        game.publishYear = data.publishYear,
+        game.minAge = data.minAge,
+        game.mechanics = data.mechanics,
+        game.averageRating = data.averageRating,
+        game.rank = data.rank,
+        game.weight = data.weight,
+        game.title = data.title,
+        game.bestPlayers = data.bestPlayers,
+        game.languageDependence = data.languageDependence
+
+        return game
+    }
+};
 
 /**
  * Gets all IDs from all games in the database
@@ -31,7 +93,8 @@ async function getIDsFromDB () {
  */
 async function addGameToDB (gameObject) {
     const id = gameObject.id
-    await setDoc(doc(db, "GameCollection", String(id)), gameObject, {merge: true});
+    const ref = doc(db, "GameCollection", String(id)).withConverter(gameConverter)
+    await setDoc(ref, gameObject, {merge: true});
 }
 
 /**
@@ -47,7 +110,7 @@ async function deleteGameFromDB(objectID) {
  * @returns an array containing game objects
  */
 async function getGamesFromDB() {
-    const gameDocs = await getDocs(dbGameCollection)
+    const gameDocs = await getDocs(dbGameCollection).withConverter(gameConverter)
     const games = gameDocs.docs.map( (gameDoc)=> {
         let data = gameDoc.data()
         data.objectID = gameDoc.id
@@ -61,7 +124,7 @@ async function getGamesFromDB() {
  * @param {Array[Game]} collection 
  * @returns 
  */
-function getSetOfIDsFromCollection(collection) {
+function extractIDs(collection) {
     let collectionIDs = collection.map( (object) => object.id )
     return [...new Set(collectionIDs)]
 }
@@ -75,12 +138,13 @@ function getSetOfIDsFromCollection(collection) {
  * @returns an object with properties removedGames and addedGames, containing the number of games added and removed
  */
 async function synchronizeCollection (username, fullSync) {
+    console.log(`Comparing BGG collection with database and updating...`);
     let added = 0;
     let removed = 0;
 
     //Get IDs for games in collection
-    let collection = await getCollection(username)
-    let collectionIDs = getSetOfIDsFromCollection(collection)
+    let collection = await getBaseCollection(username)
+    let collectionIDs = extractIDs(collection)
 
     //Get IDS from DB
     const DBIDs = await getIDsFromDB()
@@ -96,12 +160,9 @@ async function synchronizeCollection (username, fullSync) {
             if (collectionIDs[0] === DBIDs[0]) {
                 //if fullSync is true, merge the new game into db anyway
                 if (fullSync) {
-                        // await new Promise(r => setTimeout(r, 1000));
-                        // const currentGame = await getGame(collectionIDs[0])
-                        // let object = collection.find( (object) => object.id === collectionIDs[0] )
-                        // currentGame.boxSize = object.boxSize
 
                         let currentGame = collection.find( (object) => object.id === collectionIDs[0] )
+                        await fetchGameDetails(currentGame)
                         await addGameToDB(currentGame)
                         added++
                 }
@@ -111,6 +172,7 @@ async function synchronizeCollection (username, fullSync) {
             //If the collection id is lesser, game does not exists in DB and should be added
             } else if (collectionIDs[0] < DBIDs[0]) {
                     let currentGame = collection.find( (object) => object.id === collectionIDs[0] )
+                    await fetchGameDetails(currentGame)
                     await addGameToDB(currentGame)
                     collectionIDs.shift()
                     added++
@@ -126,9 +188,10 @@ async function synchronizeCollection (username, fullSync) {
         //if there is still elements in collectionIDs, add those to the db
         while (collectionIDs.length > 0) {
             let currentGame = collection.find( (object) => object.id === collectionIDs[0] )
-                await addGameToDB(currentGame)
-                collectionIDs.shift()
-                added++
+            await fetchGameDetails(currentGame)
+            await addGameToDB(currentGame)
+            collectionIDs.shift()
+            added++
         }
 
         //If there is still elements in DBIDs, remove those from DB
