@@ -10,13 +10,17 @@ fillShelvesButton.addEventListener('pointerdown', ()=> {
     onFillShelvesAction()
 })
 
-const SHRINKFACTOR = 4
+const SHRINKFACTOR = 3
+const SORTCRITERIA_A ='weight'
+const SORTCRITERIA_B ='officialTime'
+const SCREENUNIT = 'rem'
 
 class Shelf {
     constructor() {
         this.remHeight = parseFloat(shelfHeightField.value)
         this.rows = []
     }
+
     /**
      * Places a game in a row on the shelf. May construct a new row, if there is no space for the game in any row, 
      * and if there is still space for a row with the game on the shelf
@@ -93,19 +97,19 @@ class ShelfRow {
      */
     place(game) {
         if (this.height === 0) {
-            if (game.x <= this.remWidth) {
+            if (game.z <= this.remWidth) {
                 this.content.push(game)
                 this.height = parseFloat(game.y)
-                this.remWidth -= parseFloat(game.x)
+                this.remWidth -= parseFloat(game.z)
                 return true
             } else {
                 return false
             }
         } else {
-            if (game.y <= this.height && game.x <= this.remWidth) {
+            if (game.y <= this.height && game.z <= this.remWidth) {
                 this.content.push(game)
                 this.height = parseFloat(game.y)
-                this.remWidth -= parseFloat(game.x)
+                this.remWidth -= parseFloat(game.z)
                 return true
             } else {
                 return false
@@ -115,9 +119,15 @@ class ShelfRow {
 }
 
 class Game {
-    constructor(id, versionID) {
-        this.id = String(id),
+    constructor(id, versionID, x, y, z, mass, img, thumbnail) {
+        this.id = String(id)
         this.versionID = String(versionID)
+        this.x = parseFloat(x)
+        this.y = parseFloat(y)
+        this.z = parseFloat(z)
+        this.mass = parseFloat(mass)
+        this.img = String(img)
+        this.thumbnail = String(thumbnail)
     }
 }
 
@@ -129,13 +139,14 @@ async function onFillShelvesAction() {
     while (leftoverContainer.firstChild) {
         leftoverContainer.removeChild(leftoverContainer.lastChild)
     }
+    leftoverContainer.style.width = `${maxColumnsField.value*shelfWidthField.value / SHRINKFACTOR}${SCREENUNIT}`
     
     //fetch updated list of games
     const games = await fetchCollection(usernameField.value)
 
 
     //fill out shelf array, sorted by second criteria
-    const filledShelves = distributeGamesToShelves(games, 'weight', 'officialTime')
+    const filledShelves = distributeGamesToShelves(games, SORTCRITERIA_A, SORTCRITERIA_B)
     
     //display the shelf array
     displayShelves(filledShelves)
@@ -258,22 +269,73 @@ function divideIntoRows(rows, sortedList) {
  */
 async function fetchCollection (username) {
     const response = await fetch(`/collection/${username}`)
-    const games = await JSON.parse( await response.text())
+    const simpleGames = await JSON.parse( await response.text())
+    const games = simpleGames.map( (input) => {
+        const sizes = [parseFloat(input.x), parseFloat(input.z), parseFloat(input.y)]
+        sizes.sort( (a, b) => a - b)
+
+        const game = new Game(input.id, input.versionID, sizes[2], sizes[0],sizes[1],input.mass,input.img,input.thumbnail)
+        game.minPlayers = input.minPlayers,
+        game.maxPlayers = input.maxPlayers,
+        game.minTime = input.minTime,
+        game.maxTime = input.maxTime,
+        game.officialTime = input.officialTime,
+        game.description = input.description,
+        game.publishYear = input.publishYear,
+        game.minAge = input.minAge,
+        game.mechanics = input.mechanics,
+        game.averageRating = input.averageRating,
+        game.rank = input.rank,
+        game.weight = input.weight,
+        game.title = input.title,
+        game.bestPlayers = input.bestPlayers,
+        game.languageDependence = input.languageDependence
+        return game
+    })
     return games
 }
 
 function displayShelves(shelfArray) {
+
+
+    const shelfHeight = `${parseFloat(shelfHeightField.value) / SHRINKFACTOR}${SCREENUNIT}`
+    const shelfWidth =`${parseFloat(shelfWidthField.value) / SHRINKFACTOR}${SCREENUNIT}`
+
+    shelfContainer.style.width = (shelfWidth*parseFloat(maxColumnsField.value)+5)
+    shelfContainer.style.height = (shelfWidth*parseFloat(maxRowsField.value)+5)
+
     let col = 0
     for (let row in shelfArray[col]) {
         const currentTableRow = document.createElement('tr')
+        currentTableRow.style.height = shelfHeight
+        currentTableRow.style.minHeight = shelfHeight
+        currentTableRow.style.maxHeight = shelfHeight
+
+
         for ( let col in shelfArray) {
             const currentTCell = document.createElement('td')
-            currentTCell.style.width = String( `${shelfWidthField.value / SHRINKFACTOR}rem`)
-            currentTCell.style.height = String( `${shelfHeightField.value / SHRINKFACTOR}rem`)
 
-            for (let game of shelfArray[col][row].getGames()) {
-                createGameElement(currentTCell, game)
+            currentTCell.style.width = shelfWidth
+            currentTCell.style.minWidth = shelfWidth
+            currentTCell.style.maxWidth = shelfWidth
+            currentTCell.style.height = shelfHeight
+            currentTCell.style.minHeight = shelfHeight
+            currentTCell.style.maxHeight = shelfHeight
+
+            for (let shelfRow of shelfArray[col][row].rows) {
+                const shelfRowElement = document.createElement('div')
+                shelfRowElement.setAttribute('class', 'shelfRow')
+
+                shelfRowElement.style.width = shelfWidth
+                shelfRowElement.style.height = `${String(shelfRow.height)/ SHRINKFACTOR}${SCREENUNIT}`
+       
+                for (let game of shelfRow.content) {
+                    createGameElement(shelfRowElement, game)
+                }
+
+                currentTCell.appendChild(shelfRowElement)
             }
+
             currentTableRow.prepend(currentTCell)
             col++
         }
@@ -288,8 +350,15 @@ function createGameElement(parent, game) {
     const gameElement = document.createElement('div')
     gameElement.setAttribute('class', 'game')
 
-    gameElement.style.width = String( `${Math.round(game.x) / SHRINKFACTOR}rem`)
-    gameElement.style.height = String( `${Math.round(game.y) / SHRINKFACTOR}rem`)
+    const height =`${game.y / SHRINKFACTOR}${SCREENUNIT}`
+    const width =`${game.z / SHRINKFACTOR}${SCREENUNIT}`
+
+    gameElement.style.width = width
+    gameElement.style.minWidth = width
+    gameElement.style.maxWidth = width
+    gameElement.style.height = height
+    gameElement.style.minHeight = height
+    gameElement.style.maxHeight = height
     gameElement.textContent = String( `${game.title}`)
 
 

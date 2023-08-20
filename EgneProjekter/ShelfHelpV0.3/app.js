@@ -1,6 +1,20 @@
+//CONSTANTS  -------------------------------------------------------------------------------------------------------------
 const host = 'localhost'
 const port = 80
 const username = 'LuciusWriter'
+
+class Game {
+    constructor(id, versionID, x, y, z, mass, img, thumbnail) {
+        this.id = String(id)
+        this.versionID = String(versionID)
+        this.x = parseFloat(x)
+        this.y = parseFloat(y)
+        this.z = parseFloat(z)
+        this.mass = parseFloat(mass)
+        this.img = String(img)
+        this.thumbnail = String(thumbnail)
+    }
+}
 
 //IMPORTS  -------------------------------------------------------------------------------------------
 //Firebase import
@@ -19,16 +33,15 @@ import cors from 'cors'
 import express, { json } from 'express'
 const app = express();
 
-
 //Set view engine
 app.set('view engine', 'pug')
 
-//Middleware
+//Middleware -------------------------------------------------------------------------------------------------------------
 app.use(express.static('Assets'))
 app.use(cors())
 app.use(express.json())
 
-//endpoints
+//endpoints -------------------------------------------------------------------------------------------------------------
 app.get('/', async (req, res) => {
    
     res.render('home', {  })
@@ -43,38 +56,28 @@ app.get('/collection/:name', async (req, res) => {
      res.send(games)
 })
 
-//other functions
-async function synchronizeWithDB (username) {
+//Functions -------------------------------------------------------------------------------------------------------------
+async function synchronizeWithDB (username, fullsync) {
     console.log('Synchronizing with BGG');
-    const syncStats = await synchronizeCollection(username, false)
+    const syncStats = await synchronizeCollection(username, fullsync)
     console.log(`Database synchronized. ${syncStats.addedGames} added or updated, ${syncStats.removedGames} removed.`);
 }
 
+async function checkForSync(fullsync) {
+    const now = Timestamp.fromDate(new Date()).toMillis()
+    let lastSync = await getLastSyncDate(username)
+    lastSync = lastSync.toMillis()
 
-class Game {
-    constructor(id, versionID, x, y, z, mass, img, thumbnail) {
-        this.id = String(id)
-        this.versionID = String(versionID)
-        this.x = parseFloat(x)
-        this.y = parseFloat(y)
-        this.z = parseFloat(z)
-        this.mass = parseFloat(mass)
-        this.img = String(img)
-        this.thumbnail = String(thumbnail)
+
+    if ( (now - lastSync) / 1000 / 60 / 60  > 0) {
+        await synchronizeWithDB(username, fullsync)
+    } else {
+        console.log(`Did not sync database.`);
+        console.log(`Hours since last sync : ${(now - lastSync) / 1000 / 60 / 60}`);
     }
 }
 
+//MAIN  -------------------------------------------------------------------------------------------------------------
 
-const now = Timestamp.fromDate(new Date()).toMillis()
-let lastSync = await getLastSyncDate(username)
-lastSync = lastSync.toMillis()
-
-
-if ( (now - lastSync) / 1000 / 60 / 60  > 24) {
-    await synchronizeWithDB(username, false)
-} else {
-    console.log(`Did not sync database.`);
-    console.log(`Hours since last sync : ${(now - lastSync) / 1000 / 60 / 60}`);
-}
-
+await checkForSync(false)
 app.listen(port, console.log(`server running on ${port}`))

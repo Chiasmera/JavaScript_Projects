@@ -86,7 +86,7 @@ function parseCollectiontoGameObjects (collectionXML) {
     console.log(`Converting collection to Games`);
 
     const games = []
-    for (let game of collectionXML.items.item) {       
+    for (let game of collectionXML.items.item) {  
         const id = game.objectid
         let versionID = 0
         let x = 29.6
@@ -95,16 +95,32 @@ function parseCollectiontoGameObjects (collectionXML) {
         let mass = 0
         let img = ''
         let thumbnail = ''
+        
         if (game.version) {
             versionID = game.version.item.id
-            x = game.version.item.width.value * 2.54
-            y = game.version.item.depth.value * 2.54
-            z = game.version.item.length.value * 2.54
+            if (game.version.item.width.value > 0) {
+                x = parseFloat(game.version.item.width.value )* 2.54
+            }
+            if (game.version.item.depth.value > 0) {
+            y = parseFloat(game.version.item.depth.value) * 2.54
+            }
+            if (game.version.item.length.value > 0) {
+            z = parseFloat(game.version.item.length.value) * 2.54
+            }          
+
+            //assign shortest side as y (height), next-shortest as x (width)
+            const sizes = [parseFloat(x), parseFloat(z), parseFloat(y)]
+            sizes.sort( (a, b) => a - b)
+            y = sizes[0]
+            x = sizes[2]
+            z = sizes[1]
+
             mass = game.version.item.weight.value
             img = game.version.item.image
             thumbnail = game.version.item.thumbnail
         }
         games.push(new Game(id, versionID, x, y, z, mass, img, thumbnail))
+
     }
     return games
 }

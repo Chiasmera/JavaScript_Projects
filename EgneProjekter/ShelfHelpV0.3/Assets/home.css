@@ -20,26 +20,29 @@ body {
 
 .shelfContainer {
     grid-area: shelfContainer;
+    table-layout: fixed;
+    /* overflow: scroll; */
 
-    padding: 0.25rem;
-    width: fit-content;
-    height: fit-content;
     border-style: outset;
     border-width: 0.25rem;
     border-color: rgba(128, 128, 128, 0.5);
-
+    height:fit-content;
+    width:fit-content;
 }
 
 tr {
+    /* table-layout: fixed;
+    overflow: hidden; */
 
 }
 
 td {
     border-style: inset;
     border-width: 0.25rem;
-
+    table-layout: fixed;
     padding: 0px;
     margin: 0px;
+    /* overflow: hidden; */
 }
 
 
