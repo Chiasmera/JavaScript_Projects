@@ -31,7 +31,6 @@ class Shelf {
                 this.rows.push(currentRow)
                 return currentRow.place(game)
             } else {
-                console.log(`Game (${game.title}) could not be placed. Reason: too tall`);
                 return false
             }        
 
@@ -57,7 +56,6 @@ class Shelf {
                     this.rows.push(currentRow)
                     return true
                 } else {
-                    console.log(`Game (${game.title}) could not be placed. Reason: SheldRow reported false`);
                     return false
                 }
             } else {
@@ -292,7 +290,7 @@ function createGameElement(parent, game) {
 
     gameElement.style.width = String( `${Math.round(game.x) / SHRINKFACTOR}rem`)
     gameElement.style.height = String( `${Math.round(game.y) / SHRINKFACTOR}rem`)
-    gameElement.textContent = String( `${game.title} (W:${game.weight}, T:${game.officialTime})`)
+    gameElement.textContent = String( `${game.title}`)
 
 
     parent.prepend(gameElement)

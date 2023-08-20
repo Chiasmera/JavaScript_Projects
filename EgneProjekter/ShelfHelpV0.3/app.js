@@ -7,7 +7,7 @@ const username = 'LuciusWriter'
 import { initializeApp } from 'firebase/app'
 import { getFirestore, collection, getDocs, setDoc, getDoc, doc, deleteDoc, addDoc, Timestamp } from 'firebase/firestore'
 import { firebaseConfig } from './FB_Config.js'
-import { synchronizeCollection, setLastSyncDate, getLastSyncDate } from './FireBase_Controller.js';
+import { synchronizeCollection,  getLastSyncDate, setLastSyncDate, getGamesFromDB } from './FireBase_Controller.js';
 
 const firebase_app = initializeApp(firebaseConfig)
 const db = getFirestore(firebase_app)
@@ -37,13 +37,10 @@ app.get('/', async (req, res) => {
 app.get('/collection/:name', async (req, res) => {
     const username = req.params.name
 
-    //TODO - check if collection already exists in databas before fetching
-    // const collectionXML = await fetchCollectionXMLFromBGG(username, false)
-    // const games = parseXMLtoGameObjects(collectionXML)
-    // console.log(games);
+    let games = await getGamesFromDB(username)
 
-    // games = await JSON.stringify(await fetchGamesFromBGG(games))
-    // res.send(games)
+     games = await JSON.stringify(games)
+     res.send(games)
 })
 
 //other functions
@@ -58,22 +55,22 @@ class Game {
     constructor(id, versionID, x, y, z, mass, img, thumbnail) {
         this.id = String(id)
         this.versionID = String(versionID)
-        this.x = x
-        this.y = y
-        this.z = z
-        this.mass = mass
-        this.img = img
-        this.thumbnail = thumbnail
+        this.x = parseFloat(x)
+        this.y = parseFloat(y)
+        this.z = parseFloat(z)
+        this.mass = parseFloat(mass)
+        this.img = String(img)
+        this.thumbnail = String(thumbnail)
     }
 }
 
 
 const now = Timestamp.fromDate(new Date()).toMillis()
-let lastSync =await getLastSyncDate()
+let lastSync = await getLastSyncDate(username)
 lastSync = lastSync.toMillis()
 
 
-if ( (now - lastSync) / 1000 / 60 / 60  > 0) {
+if ( (now - lastSync) / 1000 / 60 / 60  > 24) {
     await synchronizeWithDB(username, false)
 } else {
     console.log(`Did not sync database.`);

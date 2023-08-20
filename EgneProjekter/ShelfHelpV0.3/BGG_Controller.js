@@ -16,12 +16,12 @@ class Game {
     constructor(id, versionID, x, y, z, mass, img, thumbnail) {
         this.id = String(id)
         this.versionID = String(versionID)
-        this.x = x
-        this.y = y
-        this.z = z
-        this.mass = mass
-        this.img = img
-        this.thumbnail = thumbnail
+        this.x = parseFloat(x)
+        this.y = parseFloat(y)
+        this.z = parseFloat(z)
+        this.mass = parseFloat(mass)
+        this.img = String(img)
+        this.thumbnail = String(thumbnail)
     }
 }
 
@@ -71,7 +71,7 @@ async function fetchCollectionXMLFromBGG(username, includeExpansion) {
  * @returns an Array of simple Game objects
  */
 function parseCollectiontoGameObjects (collectionXML) {
-    console.log(`Creating objects from collection`);
+    console.log(`Converting collection to Games`);
 
     const games = []
     for (let game of collectionXML.items.item) {       
@@ -85,14 +85,14 @@ function parseCollectiontoGameObjects (collectionXML) {
         let thumbnail = ''
         if (game.version) {
             versionID = game.version.item.id
-            x = game.version.item.width * 2.54
-            y = game.version.item.depth * 2.54
-            z = game.version.item.length * 2.54
+            x = game.version.item.width.value * 2.54
+            y = game.version.item.depth.value * 2.54
+            z = game.version.item.length.value * 2.54
             mass = game.version.item.weight.value
             img = game.version.item.image
             thumbnail = game.version.item.thumbnail
         }
-        games.push(new Game(id, versionID, x, y, z, mass))
+        games.push(new Game(id, versionID, x, y, z, mass, img, thumbnail))
     }
     return games
 }

@@ -51,6 +51,7 @@ td {
     overflow: hidden;
     padding: 0px;
     margin: 0px;
+    font-size: 0.75rem;
 }
 
 .number {
