@@ -117,7 +117,6 @@ async function getGamesFromDB(username) {
     const games = gameDocs.docs.map( (gameDoc)=> {
         return gameDoc.data()
      })
-     console.log(games[0]);
     return games
 }
 
@@ -175,7 +174,6 @@ async function synchronizeCollection (username, fullSync) {
             //If the collection id is lesser, game does not exists in DB and should be added
             } else if (collectionIDs[0] < DBIDs[0]) {
                     let currentGame = collection.find( (object) => object.id === collectionIDs[0] )
-                    console.log(currentGame);
                     await fetchGameDetails(currentGame)
                     await addGameToDB(currentGame, username)
                     collectionIDs.shift()

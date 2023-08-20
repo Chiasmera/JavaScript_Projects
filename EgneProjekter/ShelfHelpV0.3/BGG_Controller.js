@@ -58,11 +58,22 @@ async function fetchXML (url) {
  * @returns a js object parsed firectly from the xml
  */
 async function fetchCollectionXMLFromBGG(username, includeExpansion) {
-    console.log(`Fetching collection for: ${username}`);
+    await new Promise(r => setTimeout(r, 800));
 
-    const expansionString = includeExpansion ? '' : '&excludesubtype=boardgameexpansion'
-    const xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/collection?username=${username}${expansionString}&excludesubtype=boardgameexpansion&version=1`)
-    return await parseXML(xml)
+    try {
+        console.log(`Fetching collection for: ${username}`);
+
+        const expansionString = includeExpansion ? '' : '&excludesubtype=boardgameexpansion'
+        const xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/collection?username=${username}${expansionString}&excludesubtype=boardgameexpansion&version=1`)
+        return await parseXML(xml)
+    } catch (error) {
+
+        if (error.status === 429 || error.status === 202) {
+            await fetchCollectionXMLFromBGG(game)
+        }
+
+    }
+
 }
 
 /**
@@ -71,6 +82,7 @@ async function fetchCollectionXMLFromBGG(username, includeExpansion) {
  * @returns an Array of simple Game objects
  */
 function parseCollectiontoGameObjects (collectionXML) {
+
     console.log(`Converting collection to Games`);
 
     const games = []
