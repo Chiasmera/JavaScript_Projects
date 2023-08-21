@@ -10,10 +10,11 @@ fillShelvesButton.addEventListener('pointerdown', ()=> {
     onFillShelvesAction()
 })
 
-const SHRINKFACTOR = 3
+const SHRINKFACTOR = 4
 const SORTCRITERIA_A ='weight'
 const SORTCRITERIA_B ='officialTime'
 const SCREENUNIT = 'rem'
+let GAMES = []
 
 class Shelf {
     constructor() {
@@ -162,11 +163,13 @@ async function onFillShelvesAction() {
     leftoverContainer.style.width = `${maxColumnsField.value*shelfWidthField.value / SHRINKFACTOR}${SCREENUNIT}`
     
     //fetch updated list of games
-    const games = await fetchCollection(usernameField.value)
+    if (!GAMES.length > 0) {
+        GAMES = await fetchCollection(usernameField.value)
+    } 
 
 
     //fill out shelf array, sorted by second criteria
-    const filledShelves = distributeGamesToShelves(games, SORTCRITERIA_A, SORTCRITERIA_B)
+    const filledShelves = distributeGamesToShelves(GAMES, SORTCRITERIA_A, SORTCRITERIA_B)
     
     //display the shelf array
     displayShelves(filledShelves)
@@ -355,7 +358,7 @@ function displayShelves(shelfArray) {
                 shelfRowElement.setAttribute('class', 'shelfRow')
 
                 shelfRowElement.style.width = '100%'
-                shelfRowElement.style.height = `${(parseFloat(shelfRow.height)/ SHRINKFACTOR )+0.5 }${SCREENUNIT}`
+                // shelfRowElement.style.height = `${(parseFloat(shelfRow.height)/ SHRINKFACTOR )+0.5 }${SCREENUNIT}`
        
                  
                 for (let game of shelfRow.content) {

@@ -21,8 +21,6 @@ body {
 .shelfContainer {
     grid-area: shelfContainer;
     table-layout: fixed;
-    /* overflow: scroll; */
-
     border-style: outset;
     border-width: 0.25rem;
     border-color: rgba(128, 128, 128, 0.5);
@@ -31,8 +29,6 @@ body {
 }
 
 tr {
-    /* table-layout: fixed;
-    overflow: hidden; */
 
 }
 
@@ -42,12 +38,11 @@ td {
     table-layout: fixed;
     padding: 0px;
     margin: 0px;
-    /* overflow: hidden; */
+
 }
 
 .shelfRow {
-    /* overflow: hidden; */
-    margin: 0.1rem;
+    margin: 0.0rem;
     padding: 0rem;
 }
 
