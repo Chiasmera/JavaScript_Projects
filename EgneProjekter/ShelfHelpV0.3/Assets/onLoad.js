@@ -28,20 +28,23 @@ class Shelf {
      * @returns true if game was placed correctly, false otherwise
      */
     place (game) {
+        //check if any rows exists on the shelf
         if (this.rows.length === 0) {
             if (game.y < this.remHeight) {
-                this.remHeight -= game.y
                 const currentRow = new ShelfRow()
-                this.rows.push(currentRow)
-                return currentRow.place(game)
+                if (currentRow.place(game)) {
+                    this.remHeight -= currentRow.height
+                    this.rows.push(currentRow)
+                    return true
+                } else {
+                    return false
+                }
             } else {
                 return false
-            }        
-
-
-        } else {
-
-        
+            }       
+            
+        //row exists already   
+        } else {        
             //if there is space in any row, place and return true
             for ( let row of this.rows) {
                 if (row.place(game)) {
@@ -50,7 +53,6 @@ class Shelf {
             }
 
             // else A new row must be constructed, if there is space
-          
             //check for space in height
             if (game.y <= this.remHeight) {
                 const currentRow = new ShelfRow()
@@ -68,6 +70,10 @@ class Shelf {
             
         }        
         
+    }
+
+    sortRows() {
+        this.rows.sort( (a, b) => { return b.remWidth - a.remWidth})
     }
 
     getGames() {
@@ -96,25 +102,39 @@ class ShelfRow {
      * @returns true if game was placed, false otherwise
      */
     place(game) {
-        if (this.height === 0) {
-            if (game.z <= this.remWidth) {
-                this.content.push(game)
-                this.height = parseFloat(game.y)
-                this.remWidth -= parseFloat(game.z)
-                return true
-            } else {
-                return false
-            }
+        
+
+        //check for shortest side of game
+        const sizes = [parseFloat(game.x), parseFloat(game.z), parseFloat(game.y)]
+        sizes.sort( (a, b) => a - b)
+        const gameHeight = sizes[0]
+        const gameWidth = sizes[1]
+
+        //check if game fits within width
+        if (gameWidth > this.remWidth) {
+            return false
         } else {
-            if (game.y <= this.height && game.z <= this.remWidth) {
+            if (this.height === 0) {
+                //no game has been placed yet in this row
                 this.content.push(game)
-                this.height = parseFloat(game.y)
-                this.remWidth -= parseFloat(game.z)
+                this.height = parseFloat(gameHeight)
+                this.remWidth -= parseFloat(gameWidth)
                 return true
-            } else {
-                return false
-            }  
+
+        } else {
+                //a game is already placed on shelf, check if it fits in height
+                if (gameHeight <= this.height) {
+                    this.content.push(game)
+                    this.height = parseFloat(gameHeight)
+                    this.remWidth -= parseFloat(gameWidth)
+                    return true
+                } else {
+                    return false
+                }  
+            }
         }
+
+        
     }
 }
 
@@ -237,6 +257,13 @@ function distributeGamesToShelves(games, sortByA, sortByB) {
             //remove any rows and columns containing ONLY empty shelves empty shelves?
             //TODO
 
+            //sort shelves in array before returning
+            for (let column of shelves) {
+                for (let shelf of column) {
+                    shelf.sortRows()
+                }
+            }
+
             return shelves
     }
 }
@@ -298,8 +325,8 @@ async function fetchCollection (username) {
 function displayShelves(shelfArray) {
 
 
-    const shelfHeight = `${parseFloat(shelfHeightField.value) / SHRINKFACTOR}${SCREENUNIT}`
-    const shelfWidth =`${parseFloat(shelfWidthField.value) / SHRINKFACTOR}${SCREENUNIT}`
+    const shelfHeight = `${(parseFloat(shelfHeightField.value) / SHRINKFACTOR)+1}${SCREENUNIT}`
+    const shelfWidth =`${(parseFloat(shelfWidthField.value) / SHRINKFACTOR)+1}${SCREENUNIT}`
 
     shelfContainer.style.width = (shelfWidth*parseFloat(maxColumnsField.value)+5)
     shelfContainer.style.height = (shelfWidth*parseFloat(maxRowsField.value)+5)
@@ -322,19 +349,22 @@ function displayShelves(shelfArray) {
             currentTCell.style.minHeight = shelfHeight
             currentTCell.style.maxHeight = shelfHeight
 
+
             for (let shelfRow of shelfArray[col][row].rows) {
                 const shelfRowElement = document.createElement('div')
                 shelfRowElement.setAttribute('class', 'shelfRow')
 
-                shelfRowElement.style.width = shelfWidth
-                shelfRowElement.style.height = `${String(shelfRow.height)/ SHRINKFACTOR}${SCREENUNIT}`
+                shelfRowElement.style.width = '100%'
+                shelfRowElement.style.height = `${(parseFloat(shelfRow.height)/ SHRINKFACTOR )+0.5 }${SCREENUNIT}`
        
+                 
                 for (let game of shelfRow.content) {
                     createGameElement(shelfRowElement, game)
                 }
 
                 currentTCell.appendChild(shelfRowElement)
             }
+            ;
 
             currentTableRow.prepend(currentTCell)
             col++
@@ -343,6 +373,7 @@ function displayShelves(shelfArray) {
             shelfContainer.prepend(currentTableRow)
         }
     }
+
 }
 
 
@@ -350,8 +381,8 @@ function createGameElement(parent, game) {
     const gameElement = document.createElement('div')
     gameElement.setAttribute('class', 'game')
 
-    const height =`${game.y / SHRINKFACTOR}${SCREENUNIT}`
-    const width =`${game.z / SHRINKFACTOR}${SCREENUNIT}`
+    const height =`${(game.y / SHRINKFACTOR ) -0.1}${SCREENUNIT}`
+    const width =`${(game.z / SHRINKFACTOR ) -0.1}${SCREENUNIT}`
 
     gameElement.style.width = width
     gameElement.style.minWidth = width

@@ -45,15 +45,19 @@ td {
     /* overflow: hidden; */
 }
 
-
+.shelfRow {
+    /* overflow: hidden; */
+    margin: 0.1rem;
+    padding: 0rem;
+}
 
 .game {
     display: inline-block;
     border-style: solid;
-    border-width: 1px;
+    border-width: 0.05rem;
     overflow: hidden;
-    padding: 0px;
-    margin: 0px;
+    padding: 0rem;
+    margin: 0.0rem;
     font-size: 0.75rem;
 }
 

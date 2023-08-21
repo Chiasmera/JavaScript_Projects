@@ -69,7 +69,7 @@ async function checkForSync(fullsync) {
     lastSync = lastSync.toMillis()
 
 
-    if ( (now - lastSync) / 1000 / 60 / 60  > 0) {
+    if ( (now - lastSync) / 1000 / 60 / 60  > 24) {
         await synchronizeWithDB(username, fullsync)
     } else {
         console.log(`Did not sync database.`);
