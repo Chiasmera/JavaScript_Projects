@@ -64,7 +64,7 @@ async function fetchCollectionXMLFromBGG(username, includeExpansion) {
         console.log(`Fetching collection for: ${username}`);
 
         const expansionString = includeExpansion ? '' : '&excludesubtype=boardgameexpansion'
-        const xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/collection?username=${username}${expansionString}&excludesubtype=boardgameexpansion&version=1`)
+        const xml = await fetchXML(`https://boardgamegeek.com/xmlapi2/collection?username=${username}${expansionString}&version=1`)
         return await parseXML(xml)
     } catch (error) {
 

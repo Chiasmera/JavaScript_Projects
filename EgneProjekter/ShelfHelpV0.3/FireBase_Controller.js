@@ -144,7 +144,7 @@ async function synchronizeCollection (username, fullSync) {
     let removed = 0;
 
     //Get IDs for games in collection
-    let collection = await getBaseCollection(username)
+    let collection = await getBaseCollection(username, true)
     let collectionIDs = extractIDs(collection)
 
     //Get IDS from DB

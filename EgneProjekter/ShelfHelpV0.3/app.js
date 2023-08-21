@@ -79,5 +79,5 @@ async function checkForSync(fullsync) {
 
 //MAIN  -------------------------------------------------------------------------------------------------------------
 
-await checkForSync(false)
+await checkForSync(true)
 app.listen(port, console.log(`server running on ${port}`))

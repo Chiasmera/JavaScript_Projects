@@ -4,8 +4,10 @@ const maxColumnsField = document.getElementById('shelfX')
 const maxRowsField = document.getElementById('shelfY')
 const shelfHeightField = document.getElementById('shelfHeight')
 const shelfWidthField = document.getElementById('shelfWidth')
+const shelfDepthField = document.getElementById('shelfDepth')
 const usernameField = document.getElementById('user')
 const fillShelvesButton = document.getElementById('fillShelvesButton')
+
 fillShelvesButton.addEventListener('pointerdown', ()=> {
     onFillShelvesAction()
 })
@@ -14,12 +16,14 @@ const SHRINKFACTOR = 4
 const SORTCRITERIA_A ='weight'
 const SORTCRITERIA_B ='officialTime'
 const SCREENUNIT = 'rem'
+const LASTUSER = ''
 let GAMES = []
 
 class Shelf {
     constructor() {
         this.remHeight = parseFloat(shelfHeightField.value)
         this.rows = []
+        this.depth = parseFloat(shelfDepthField.value)
     }
 
     /**
@@ -29,9 +33,20 @@ class Shelf {
      * @returns true if game was placed correctly, false otherwise
      */
     place (game) {
+        //check if game fits on shelf at all
+        const sizes = [parseFloat(game.x), parseFloat(game.z), parseFloat(game.y)]
+        sizes.sort( (a, b) => a - b)
+        const gameHeight = sizes[0]
+        const gameWidth = sizes[1]
+        const gameDepth = sizes[2]
+
+        if (gameWidth > shelfWidthField.value || gameDepth > shelfDepthField.value) {
+            return false
+        }
+
         //check if any rows exists on the shelf
         if (this.rows.length === 0) {
-            if (game.y < this.remHeight) {
+            if (gameHeight < this.remHeight) {
                 const currentRow = new ShelfRow()
                 if (currentRow.place(game)) {
                     this.remHeight -= currentRow.height
@@ -55,7 +70,7 @@ class Shelf {
 
             // else A new row must be constructed, if there is space
             //check for space in height
-            if (game.y <= this.remHeight) {
+            if (gameHeight <= this.remHeight) {
                 const currentRow = new ShelfRow()
                 //place game on in new row
                 if (currentRow.place(game)) {
@@ -163,8 +178,9 @@ async function onFillShelvesAction() {
     leftoverContainer.style.width = `${maxColumnsField.value*shelfWidthField.value / SHRINKFACTOR}${SCREENUNIT}`
     
     //fetch updated list of games
-    if (!GAMES.length > 0) {
+    if (!GAMES.length > 0 || LASTUSER !== usernameField.value) {
         GAMES = await fetchCollection(usernameField.value)
+        LASTUSER === usernameField.value
     } 
 
 
