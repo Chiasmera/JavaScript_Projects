@@ -69,7 +69,7 @@ async function fetchCollectionXMLFromBGG(username, includeExpansion) {
     } catch (error) {
 
         if (error.status === 429 || error.status === 202) {
-            await fetchCollectionXMLFromBGG(game)
+            await fetchCollectionXMLFromBGG(username, includeExpansio)
         }
 
     }

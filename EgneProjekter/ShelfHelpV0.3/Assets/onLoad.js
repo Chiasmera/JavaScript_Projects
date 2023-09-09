@@ -6,7 +6,14 @@ const shelfHeightField = document.getElementById('shelfHeight')
 const shelfWidthField = document.getElementById('shelfWidth')
 const shelfDepthField = document.getElementById('shelfDepth')
 const usernameField = document.getElementById('user')
+const collectionContainer = document.querySelector('.collectionContainer')
+const bannedContainer = document.querySelector('.banContainer')
 const fillShelvesButton = document.getElementById('fillShelvesButton')
+const fectCollectionButton = document.getElementById('fetchCollectionButton')
+
+fectCollectionButton.addEventListener('pointerdown', ()=> {
+    onFetchCollectionAction()
+})
 
 fillShelvesButton.addEventListener('pointerdown', ()=> {
     onFillShelvesAction()
@@ -18,6 +25,7 @@ const SORTCRITERIA_B ='officialTime'
 const SCREENUNIT = 'rem'
 const LASTUSER = ''
 let GAMES = []
+let BANNED = []
 
 class Shelf {
     constructor() {
@@ -167,6 +175,51 @@ class Game {
     }
 }
 
+async function onFetchCollectionAction() {
+    //fetch updated list of games
+    if (!GAMES.length > 0 || LASTUSER !== usernameField.value) {
+        GAMES = await fetchCollection(usernameField.value)
+        LASTUSER === usernameField.value
+    } 
+
+    GAMES.sort( (a, b) => {return  String(a.title) > String(b.title) ? 1 : -1})
+
+    while (collectionContainer.firstChild) {
+        collectionContainer.removeChild(collectionContainer.lastChild)
+    }
+    while (bannedContainer.firstChild) {
+        bannedContainer.removeChild(bannedContainer.lastChild)
+    }
+
+    GAMES.forEach( game => {
+        let gameItem = document.createElement('div')
+        gameItem.textContent = String( `${game.title}`)
+        gameItem.setAttribute('class', 'gameListItem')
+        gameItem.addEventListener('pointerdown', () => {
+            toggleBanned(game, gameItem)
+        })
+
+        if (game.isBanned) {
+            bannedContainer.appendChild(gameItem)
+        } else {
+            collectionContainer.appendChild(gameItem)
+        }
+    } )
+}
+
+function toggleBanned (game, gameItem) {
+
+    if (game.isBanned) {
+        collectionContainer.appendChild(gameItem)
+        BANNED.splice(BANNED.indexOf(game), 1)
+        game.isBanned = false
+    } else {
+        bannedContainer.appendChild(gameItem)
+        GAMES.splice(GAMES.indexOf(game), 1)
+        game.isBanned = true
+    }
+}
+
 async function onFillShelvesAction() {
     //clear all elements in shelfContainer and leftoverContainer
     while (shelfContainer.firstChild) {
@@ -176,13 +229,6 @@ async function onFillShelvesAction() {
         leftoverContainer.removeChild(leftoverContainer.lastChild)
     }
     leftoverContainer.style.width = `${maxColumnsField.value*shelfWidthField.value / SHRINKFACTOR}${SCREENUNIT}`
-    
-    //fetch updated list of games
-    if (!GAMES.length > 0 || LASTUSER !== usernameField.value) {
-        GAMES = await fetchCollection(usernameField.value)
-        LASTUSER === usernameField.value
-    } 
-
 
     //fill out shelf array, sorted by second criteria
     const filledShelves = distributeGamesToShelves(GAMES, SORTCRITERIA_A, SORTCRITERIA_B)
@@ -272,9 +318,6 @@ function distributeGamesToShelves(games, sortByA, sortByB) {
                     }
                 }
             }
-
-            //remove any rows and columns containing ONLY empty shelves empty shelves?
-            //TODO
 
             //sort shelves in array before returning
             for (let column of shelves) {
